@@ -1,12 +1,12 @@
-const CACHE = "narrador-v47";
+const CACHE = "narrador-v48";
 const CORE = [
   "./",
   "./index.html",
-  "./bootstrap-v40.js?v=47",
-  "./pdf-cover-v40.js?v=47",
-  "./home-player-v42.js?v=47",
-  "./home-late-v47.js?v=47",
-  "./library-firsttap-v43.js?v=47",
+  "./bootstrap-v40.js?v=48",
+  "./pdf-cover-v40.js?v=48",
+  "./home-player-v42.js?v=48",
+  "./home-late-v47.js?v=48",
+  "./library-firsttap-v43.js?v=48",
   "./styles.css?v=16",
   "./interface-v15.css?v=16",
   "./interface-v16.css?v=16",
@@ -39,15 +39,12 @@ function enhanceHtml(html) {
 
   const withHead = cleaned.replace(
     "</head>",
-    '  <script src="./bootstrap-v40.js?v=47"></script>\n  <script type="module" src="./pdf-cover-v40.js?v=47"></script>\n  <script src="./home-player-v42.js?v=47"></script>\n  <script src="./library-firsttap-v43.js?v=47"></script>\n</head>'
+    '  <script src="./bootstrap-v40.js?v=48"></script>\n  <script type="module" src="./pdf-cover-v40.js?v=48"></script>\n  <script src="./home-player-v42.js?v=48"></script>\n  <script src="./library-firsttap-v43.js?v=48"></script>\n</head>'
   );
 
-  // Home recovery must execute AFTER the legacy body scripts. This is intentional:
-  // interaction-v19 is allowed to finish its startup render first, then v47 owns the
-  // final Home state and restores the real local book if that older render went empty.
   return withHead.replace(
     "</body>",
-    '  <script src="./home-late-v47.js?v=47"></script>\n</body>'
+    '  <script src="./home-late-v47.js?v=48"></script>\n</body>'
   );
 }
 
