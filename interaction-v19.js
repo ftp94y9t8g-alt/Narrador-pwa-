@@ -1,8 +1,8 @@
-// Narrador v19: reliable iPhone editing/cover picker + fast navigation/home.
+// Narrador v20: reliable iPhone editing/cover picker + fast navigation/home.
 (() => {
   const DB_NAME="narrador-db-v1", STORE="books";
   const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-  let activeMenuId=null, homeRenderBusy=false;
+  let activeMenuId=null, homeRenderBusy=false, modalClosing=false;
 
   const esc=(s="")=>String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
   const initials=(t="Narrador")=>String(t).split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]?.toUpperCase()).join("")||"NV";
@@ -48,7 +48,22 @@
     } finally {homeRenderBusy=false;}
   }
 
+  function closeKeyboard(){
+    const input=$("#editModalInput");
+    if(input && document.activeElement===input){try{input.blur();}catch(_){}}
+  }
+  function closeEdit(){
+    if(modalClosing)return;
+    modalClosing=true;
+    const m=$("#editBookModal"),input=$("#editModalInput");
+    closeKeyboard();
+    if(m){m.classList.remove("open");m.setAttribute("aria-hidden","true");}
+    if(input){input.readOnly=true;setTimeout(()=>{input.readOnly=false;},260);}
+    setTimeout(()=>{modalClosing=false;},280);
+  }
+
   function manualTab(tab){
+    closeEdit();closeKeyboard();
     const map={home:"#homeView",library:"#libraryView",history:"#historyView",settings:"#settingsView"},sel=map[tab];if(!sel)return;
     $$(".view").forEach(v=>v.classList.remove("active"));$(sel)?.classList.add("active");
     document.body.dataset.mainTab=tab;document.body.dataset.detailView="0";
@@ -59,43 +74,57 @@
   }
 
   function rowForId(id){return $$("#library .bookRow").find(r=>String(r.dataset.bookId)===String(id));}
-  function openBookDetails(id,scroll=false){const row=rowForId(id);if(!row)return;row.click();if(scroll)setTimeout(()=>$("#bookView .settingsCard")?.scrollIntoView({behavior:"smooth",block:"start"}),0);}
-  function openListen(id,index){const row=rowForId(id);if(!row){manualTab("library");return;}row.click();setTimeout(()=>{const chapters=$$("#chapters .chapterRow");chapters[Math.max(0,Math.min(index,chapters.length-1))]?.click();setTimeout(()=>$("#playBtn")?.click(),0);},0);}
+  function openBookDetails(id,scroll=false){closeKeyboard();const row=rowForId(id);if(!row)return;row.click();if(scroll)setTimeout(()=>$("#bookView .settingsCard")?.scrollIntoView({behavior:"smooth",block:"start"}),0);}
+  function openListen(id,index){closeKeyboard();const row=rowForId(id);if(!row){manualTab("library");return;}row.click();setTimeout(()=>{const chapters=$$("#chapters .chapterRow");chapters[Math.max(0,Math.min(index,chapters.length-1))]?.click();setTimeout(()=>$("#playBtn")?.click(),0);},0);}
 
-  function openMenu(id,anchor){const menu=$("#bookActionMenu");if(!menu||!id)return;activeMenuId=id;menu.classList.add("open");const r=anchor.getBoundingClientRect(),w=Math.min(250,innerWidth-24);menu.style.width=`${w}px`;menu.style.left=`${Math.max(12,Math.min(innerWidth-w-12,r.right-w))}px`;menu.style.top=`${Math.max(12,Math.min(innerHeight-330,r.bottom+7))}px`;}
+  function openMenu(id,anchor){const menu=$("#bookActionMenu");if(!menu||!id)return;closeEdit();activeMenuId=id;menu.classList.add("open");const r=anchor.getBoundingClientRect(),w=Math.min(250,innerWidth-24);menu.style.width=`${w}px`;menu.style.left=`${Math.max(12,Math.min(innerWidth-w-12,r.right-w))}px`;menu.style.top=`${Math.max(12,Math.min(innerHeight-330,r.bottom+7))}px`;}
   function closeMenu(){activeMenuId=null;$("#bookActionMenu")?.classList.remove("open");}
 
   function rowValue(id,kind){const row=rowForId(id);if(kind==="title")return row?.querySelector("h4")?.textContent?.trim()||"";const a=row?.querySelector(".libraryAuthor")?.textContent?.trim()||"";return a==="Autor no especificado"?"":a;}
   function openEditNow(kind,id){
     const modal=$("#editBookModal"),input=$("#editModalInput");if(!modal||!input)return;
+    closeMenu();
     $("#editModalTitle").textContent=kind==="title"?"Editar título":"Editar autor";
     $("#editModalLabel").textContent=kind==="title"?"Título del libro":"Autor";
-    input.dataset.kind=kind;input.dataset.bookId=id;input.value=rowValue(id,kind);
+    input.readOnly=false;input.dataset.kind=kind;input.dataset.bookId=id;input.value=rowValue(id,kind);
     modal.classList.add("open");modal.setAttribute("aria-hidden","false");
-    input.focus({preventScroll:true});
-    try{input.setSelectionRange(input.value.length,input.value.length);}catch(_){}
-  }
-  function closeEdit(){const m=$("#editBookModal");m?.classList.remove("open");m?.setAttribute("aria-hidden","true");$("#editModalInput")?.blur();}
-  async function saveEdit(){
-    const input=$("#editModalInput");if(!input)return;const value=input.value.trim();if(!value){toast("Escribe un valor antes de guardar.");input.focus();return;}
-    const b=await bookById(input.dataset.bookId);if(!b)return toast("No encontré ese libro.");
-    if(input.dataset.kind==="title")b.title=value;else b.author=value;
-    await putBook(b);closeEdit();toast(input.dataset.kind==="title"?"Título actualizado.":"Autor actualizado.");setTimeout(()=>location.reload(),120);
+    requestAnimationFrame(()=>{try{input.focus({preventScroll:true});input.setSelectionRange(input.value.length,input.value.length);}catch(_){}});
   }
 
-  function launchCoverPicker(id){const input=$("#coverEditorInput");if(!input)return;input.dataset.bookId=id;input.value="";closeMenu();input.click();}
+  async function saveEdit(){
+    const input=$("#editModalInput");if(!input)return;
+    const value=input.value.trim(),id=input.dataset.bookId,kind=input.dataset.kind;
+    if(!value){toast("Escribe un valor antes de guardar.");try{input.focus();}catch(_){}return;}
+    closeEdit();
+    try{
+      const b=await bookById(id);if(!b)return toast("No encontré ese libro.");
+      if(kind==="title")b.title=value;else b.author=value;
+      await putBook(b);toast(kind==="title"?"Título actualizado.":"Autor actualizado.");setTimeout(()=>location.reload(),140);
+    }catch(err){console.error(err);toast("No pude guardar el cambio.",3200);}
+  }
+
   async function resizeCover(file){
     const data=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>rej(r.error);r.readAsDataURL(file);});
     const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=data;});
     const size=720,c=document.createElement("canvas");c.width=size;c.height=size;const ctx=c.getContext("2d");ctx.fillStyle="#fff";ctx.fillRect(0,0,size,size);
     const scale=Math.max(size/img.width,size/img.height),w=img.width*scale,h=img.height*scale;ctx.drawImage(img,(size-w)/2,(size-h)/2,w,h);return c.toDataURL("image/jpeg",.86);
   }
-  async function saveCover(file,id){if(!file||!id)return;try{toast("Preparando portada…");const b=await bookById(id);if(!b)return;b.coverDataUrl=await resizeCover(file);await putBook(b);toast("Portada actualizada.");setTimeout(()=>location.reload(),120);}catch(err){console.error(err);toast("No pude usar esa imagen.",3500);}}
+  async function saveCover(file,id){if(!file||!id)return;try{toast("Preparando portada…");const b=await bookById(id);if(!b)return;b.coverDataUrl=await resizeCover(file);await putBook(b);toast("Portada actualizada.");setTimeout(()=>location.reload(),160);}catch(err){console.error(err);toast("No pude usar esa imagen.",3500);}}
+  function launchFreshCoverPicker(id){
+    closeKeyboard();
+    const picker=document.createElement("input");
+    picker.type="file";picker.accept="image/*";picker.setAttribute("aria-hidden","true");
+    picker.style.cssText="position:fixed;left:-20px;top:-20px;width:1px;height:1px;opacity:.01;pointer-events:none;";
+    picker.addEventListener("change",()=>{const file=picker.files?.[0];picker.remove();if(file)saveCover(file,id);},{once:true});
+    document.body.appendChild(picker);
+    try{picker.click();}catch(err){picker.remove();console.error(err);toast("No pude abrir Fotos. Inténtalo de nuevo.",3200);}
+    closeMenu();
+  }
 
   function menuActionSync(action){
     const id=activeMenuId;if(!id)return;
-    if(action==="cover")return launchCoverPicker(id);
-    if(action==="title"||action==="author"){closeMenu();return openEditNow(action,id);}
+    if(action==="cover")return launchFreshCoverPicker(id);
+    if(action==="title"||action==="author")return openEditNow(action,id);
     if(action==="open"){closeMenu();return openBookDetails(id);}
     if(action==="read"){closeMenu();return window.__narradorOpenReader?.(id,Number(rowForId(id)?.dataset.lastChapter||0),"library");}
     if(action==="delete"){
@@ -103,40 +132,45 @@
     }
   }
 
-  async function homeAction(action){const host=$("#homeFeatured"),id=host?.dataset.bookId,index=Number(host?.dataset.chapter||0);if(!id)return;const b=await bookById(id);if(!b)return;if(action==="read")return window.__narradorOpenReader?.(id,index,"home");if(action==="play")return openListen(id,index);if(action==="prev")return openListen(id,Math.max(0,index-1));if(action==="next")return openListen(id,Math.min((b.chapters?.length||1)-1,index+1));if(action==="speed"||action==="voice")return openBookDetails(id,true);}
+  async function homeAction(action){closeKeyboard();const host=$("#homeFeatured"),id=host?.dataset.bookId,index=Number(host?.dataset.chapter||0);if(!id)return;const b=await bookById(id);if(!b)return;if(action==="read")return window.__narradorOpenReader?.(id,index,"home");if(action==="play")return openListen(id,index);if(action==="prev")return openListen(id,Math.max(0,index-1));if(action==="next")return openListen(id,Math.min((b.chapters?.length||1)-1,index+1));if(action==="speed"||action==="voice")return openBookDetails(id,true);}
 
-  // Fast main tabs on pointer-down; no delayed click required.
+  function resetLegacyInteractiveNodes(){
+    const menu=$("#bookActionMenu");if(menu){const clean=menu.cloneNode(true);menu.replaceWith(clean);}
+    const modal=$("#editBookModal");if(modal){const clean=modal.cloneNode(true);modal.replaceWith(clean);}
+    const oldCover=$("#coverEditorInput");if(oldCover){const clean=oldCover.cloneNode(true);oldCover.replaceWith(clean);}
+  }
+
   document.addEventListener("pointerdown",e=>{
+    const save=e.target.closest?.("#editModalSave");
+    if(save){e.preventDefault();e.stopImmediatePropagation();saveEdit();return;}
+    const cancel=e.target.closest?.("#editModalCancel");
+    if(cancel){e.preventDefault();e.stopImmediatePropagation();closeEdit();return;}
+    const menuBtn=e.target.closest?.("#bookActionMenu [data-book-action]");
+    if(menuBtn){const action=menuBtn.dataset.bookAction;if(action==="cover")menuActionSync(action);else menuActionSync(action);e.preventDefault();e.stopImmediatePropagation();return;}
     const nav=e.target.closest?.(".bottomNav .navItem[data-tab]");
     if(nav){e.preventDefault();e.stopImmediatePropagation();manualTab(nav.dataset.tab);return;}
     const dots=e.target.closest?.(".bookMenuBtn");
     if(dots){e.preventDefault();e.stopImmediatePropagation();openMenu(dots.closest(".bookRow")?.dataset.bookId,dots);return;}
-  },true);
-
-  // Actions that must retain iOS user activation use pointer-up synchronously.
-  document.addEventListener("pointerup",e=>{
-    const menuBtn=e.target.closest?.("#bookActionMenu [data-book-action]");
-    if(menuBtn){e.preventDefault();e.stopImmediatePropagation();menuActionSync(menuBtn.dataset.bookAction);return;}
     const homeBtn=e.target.closest?.("[data-v19-home]");
     if(homeBtn){e.preventDefault();e.stopImmediatePropagation();homeAction(homeBtn.dataset.v19Home);return;}
-    const cancel=e.target.closest?.("#editModalCancel");
-    if(cancel){e.preventDefault();e.stopImmediatePropagation();closeEdit();return;}
-    const save=e.target.closest?.("#editModalSave");
-    if(save){e.preventDefault();e.stopImmediatePropagation();saveEdit();return;}
-    if(e.target.id==="editBookModal"){e.preventDefault();closeEdit();return;}
-    if(!e.target.closest?.("#bookActionMenu,.bookMenuBtn"))closeMenu();
+    if(e.target.id==="editBookModal"){e.preventDefault();e.stopImmediatePropagation();closeEdit();return;}
+    if(!e.target.closest?.("#bookActionMenu,.bookMenuBtn,.editBookSheet"))closeMenu();
   },true);
 
-  // Block legacy click handlers for controls handled above so they cannot double-fire.
+  document.addEventListener("touchstart",e=>{
+    const save=e.target.closest?.("#editModalSave"),cancel=e.target.closest?.("#editModalCancel");
+    if(save){e.preventDefault();e.stopImmediatePropagation();saveEdit();return;}
+    if(cancel){e.preventDefault();e.stopImmediatePropagation();closeEdit();return;}
+  },{capture:true,passive:false});
+
   document.addEventListener("click",e=>{
     if(e.target.closest?.("#bookActionMenu [data-book-action],#editModalCancel,#editModalSave,[data-v19-home]")){e.preventDefault();e.stopImmediatePropagation();}
   },true);
 
   document.addEventListener("DOMContentLoaded",()=>{
+    resetLegacyInteractiveNodes();
     $("#homeView .homeSection")?.remove();$("#continueCard")?.classList.add("hidden");
-    const coverInput=$("#coverEditorInput");
-    coverInput?.addEventListener("change",e=>{e.stopImmediatePropagation();const file=e.target.files?.[0],id=e.target.dataset.bookId;e.target.value="";saveCover(file,id);},true);
-    $("#editModalInput")?.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();saveEdit();}else if(e.key==="Escape")closeEdit();},true);
+    $("#editModalInput")?.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();saveEdit();}else if(e.key==="Escape"){e.preventDefault();closeEdit();}},true);
     setTimeout(renderHome,80);
     const host=$("#homeFeatured");if(host)new MutationObserver(()=>{if(!host.querySelector(".v18HomeShell"))setTimeout(renderHome,0);}).observe(host,{childList:true});
   });
