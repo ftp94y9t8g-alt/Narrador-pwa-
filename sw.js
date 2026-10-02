@@ -1,4 +1,4 @@
-const CACHE = "narrador-v22";
+const CACHE = "narrador-v23";
 const CORE = [
   "./",
   "./index.html",
@@ -10,7 +10,7 @@ const CORE = [
   "./interface-v19.css?v=20",
   "./interface-v16.js?v=16",
   "./interaction-v19.js?v=20",
-  "./cover-fix-v22.js?v=22",
+  "./cover-editor-v23.js?v=23",
   "./app.js?v=16",
   "./detector-v4.js?v=16",
   "./kokoro-ios.js?v=16",
@@ -44,8 +44,9 @@ function enhanceHtml(html) {
   html = html.replace(/<script src="\.\/interaction-v19\.js\?v=\d+"><\/script>\s*/g, "");
   html = html.replace(/<script src="\.\/cover-fix-v21\.js\?v=\d+"><\/script>\s*/g, "");
   html = html.replace(/<script src="\.\/cover-fix-v22\.js\?v=\d+"><\/script>\s*/g, "");
+  html = html.replace(/<script src="\.\/cover-editor-v23\.js\?v=\d+"><\/script>\s*/g, "");
   html = html.replace("</head>", '  <link rel="stylesheet" href="./interface-v19.css?v=20" />\n</head>');
-  html = html.replace("</body>", '  <script src="./interaction-v19.js?v=20"></script>\n  <script src="./cover-fix-v22.js?v=22"></script>\n</body>');
+  html = html.replace("</body>", '  <script src="./interaction-v19.js?v=20"></script>\n  <script src="./cover-editor-v23.js?v=23"></script>\n</body>');
   return html;
 }
 
@@ -77,7 +78,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (url.origin === self.location.origin && /(?:app\.js|styles\.css|interface-v15\.css|interface-v16\.css|interface-v17\.css|interface-v18\.css|interface-v19\.css|interface-v16\.js|interaction-v19\.js|cover-fix-v22\.js|detector-v4\.js|kokoro-ios\.js|ios-audio-v9\.js|ai-boost-v10\.js|continuous-ai-v12\.js)/.test(url.pathname)) {
+  if (url.origin === self.location.origin && /(?:app\.js|styles\.css|interface-v15\.css|interface-v16\.css|interface-v17\.css|interface-v18\.css|interface-v19\.css|interface-v16\.js|interaction-v19\.js|cover-editor-v23\.js|detector-v4\.js|kokoro-ios\.js|ios-audio-v9\.js|ai-boost-v10\.js|continuous-ai-v12\.js)/.test(url.pathname)) {
     event.respondWith(
       fetch(event.request, { cache: "no-store" })
         .then((response) => {
