@@ -1,5 +1,14 @@
-const CACHE = "narrador-v3";
-const CORE = ["./","./index.html","./styles.css?v=3","./app.js?v=3","./manifest.webmanifest","./icon.svg"];
+const CACHE = "narrador-v5";
+const CORE = [
+  "./",
+  "./index.html",
+  "./styles.css?v=5",
+  "./app.js?v=5",
+  "./detector-v4.js?v=4",
+  "./kokoro-ios.js?v=5",
+  "./manifest.webmanifest",
+  "./icon.svg"
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(CORE)).then(() => self.skipWaiting()));
@@ -17,9 +26,9 @@ self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   const url = new URL(event.request.url);
 
-  if (url.origin === self.location.origin && /(?:index\.html|app\.js|styles\.css|\/$)/.test(url.pathname)) {
+  if (url.origin === self.location.origin && /(?:index\.html|app\.js|styles\.css|detector-v4\.js|kokoro-ios\.js|\/$)/.test(url.pathname)) {
     event.respondWith(
-      fetch(event.request, {cache:"no-store"})
+      fetch(event.request, { cache: "no-store" })
         .then((response) => {
           const copy = response.clone();
           caches.open(CACHE).then((cache) => cache.put(event.request, copy)).catch(() => {});
