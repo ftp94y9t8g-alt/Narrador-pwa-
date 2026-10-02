@@ -1,6 +1,6 @@
-// Narrador v10: low-latency iPhone/Safari compatibility layer for local Kokoro voices.
-// Uses WebGPU first when Safari exposes it, falls back to WASM, preloads the
-// Spanish phonemizer, and reuses generated audio within the session.
+// Narrador v11: stable iPhone/Safari compatibility layer for local Kokoro voices.
+// Keeps the working Spanish phonemizer and audio cache from v9/v10, but avoids
+// eager GPU startup on iPhone, which can exhaust Safari's web-process memory.
 
 const KOKORO_URLS = [
   "https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/+esm",
@@ -21,13 +21,19 @@ function setVoiceNote(message, isError = false) {
   if (!note) return;
   const strong = note.querySelector("strong");
   const span = note.querySelector("span");
-  if (strong) strong.textContent = isError ? "IA local · problema de voz" : "IA local beta · v10";
+  if (strong) strong.textContent = isError ? "IA local · problema de voz" : "IA local beta · v11";
   if (span) span.textContent = message;
 }
 
 function shortError(error) {
   const raw = error?.message || error?.name || String(error || "Error desconocido");
   return String(raw).replace(/\s+/g, " ").slice(0, 240);
+}
+
+function isIOSDevice() {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent || "";
+  return /iPad|iPhone|iPod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 }
 
 async function importFromFallbacks(urls, validator, label) {
@@ -64,7 +70,6 @@ async function loadSpanishPhonemizer() {
 
   spanishPhonemizerPromise = (async () => {
     setVoiceNote("Preparando pronunciación española local…");
-
     const mod = await importFromFallbacks(
       EPHONE_URLS,
       m => typeof m?.default === "function" && typeof m?.roa === "function",
@@ -80,7 +85,6 @@ async function loadSpanishPhonemizer() {
     const hasLatAm = Array.isArray(voices) && voices.some(v => String(v?.name || "").toLowerCase() === "es-419");
     const voice = hasLatAm ? "es-419" : "es";
     engine.setVoice(voice);
-
     return { engine, voice };
   })().catch(error => {
     spanishPhonemizerPromise = null;
@@ -112,12 +116,10 @@ function addNarradorGeneration(tts) {
   const originalGenerate = tts.generate.bind(tts);
   const cache = new Map();
   const pending = new Map();
-  const MAX_CACHE = 10;
+  const MAX_CACHE = 12;
 
   async function generateUncached(text, { voice = "af_heart", speed = 1 } = {}) {
-    if (!/^e[fm]_/.test(voice)) {
-      return originalGenerate(text, { voice, speed });
-    }
+    if (!/^e[fm]_/.test(voice)) return originalGenerate(text, { voice, speed });
 
     let stage = "pronunciación";
     try {
@@ -162,9 +164,7 @@ function addNarradorGeneration(tts) {
   };
 
   tts.prepareLanguage = async (language = "es") => {
-    if (String(language).toLowerCase().startsWith("es")) {
-      await loadSpanishPhonemizer();
-    }
+    if (String(language).toLowerCase().startsWith("es")) await loadSpanishPhonemizer();
     return true;
   };
 
@@ -173,11 +173,16 @@ function addNarradorGeneration(tts) {
 }
 
 export class KokoroTTS {
+  static async prepareLanguage(language = "es") {
+    if (String(language).toLowerCase().startsWith("es")) await loadSpanishPhonemizer();
+    return true;
+  }
+
   static async from_pretrained(modelId, options = {}) {
     if (singletonPromise) return singletonPromise;
 
     singletonPromise = (async () => {
-      setVoiceNote("Preparando el motor neuronal… Narrador lo dejará listo antes de reproducir.");
+      setVoiceNote("Preparando el motor neuronal…");
       const mod = await importKokoroModule();
       const BaseKokoroTTS = mod.KokoroTTS;
 
@@ -186,13 +191,15 @@ export class KokoroTTS {
       delete common.device;
 
       const attempts = [];
-      if (typeof navigator !== "undefined" && navigator.gpu) {
+      const ios = isIOSDevice();
+
+      // WebGPU can be faster, but on iPhone the model may push Safari over its
+      // per-tab memory limit. Keep the known-working Q4/WASM path on iOS.
+      if (!ios && typeof navigator !== "undefined" && navigator.gpu) {
         attempts.push({ dtype: "q4", device: "webgpu", label: "GPU" });
       }
-      attempts.push(
-        { dtype: "q4", device: "wasm", label: "WASM Q4" },
-        { dtype: "q8", device: "wasm", label: "WASM Q8" }
-      );
+      attempts.push({ dtype: "q4", device: "wasm", label: "WASM Q4" });
+      if (!ios) attempts.push({ dtype: "q8", device: "wasm", label: "WASM Q8" });
 
       let lastError = null;
       for (const attempt of attempts) {
@@ -205,13 +212,6 @@ export class KokoroTTS {
           });
           base.narradorDevice = attempt.device;
           const tts = addNarradorGeneration(base);
-
-          // Start the Spanish pronunciation engine immediately instead of waiting
-          // for the first Play tap. This runs in parallel and is reused later.
-          loadSpanishPhonemizer().catch(error => {
-            console.warn("Narrador: el pronunciador español se cargará al necesitarlo", error);
-          });
-
           setVoiceNote(`Motor neuronal listo · ${attempt.device === "webgpu" ? "aceleración GPU" : "modo compatible"}.`);
           return tts;
         } catch (error) {
