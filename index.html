@@ -54,7 +54,7 @@
     <section id="libraryView" class="view">
       <header class="mainHeader">
         <div class="mainBrand"><div class="mainBrandMark">N</div><div><div class="mainBrandName">Narrador</div><div class="mainBrandSub">Mi colección</div></div></div>
-        <label class="homePlus libraryPlus" for="pdfInput2" aria-label="Importar PDF">＋</label>
+        <label class="homePlus" for="pdfInput2" aria-label="Importar PDF" style="-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation">＋</label>
         <input id="pdfInput2" type="file" accept="application/pdf,.pdf" />
       </header>
 
@@ -245,11 +245,11 @@
   <script src="./continuous-ai-v12.js?v=16"></script>
   <script src="./interface-v16.js?v=16"></script>
   <script src="./interaction-v19.js?v=31"></script>
-  <script src="./library-v33.js?v=33"></script>
+  <script src="./library-v33.js?v=35"></script>
   <script>
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.addEventListener("controllerchange", () => {
-        const key = "narrador-v33-reloaded";
+        const key = "narrador-v35-reloaded";
         if (sessionStorage.getItem(key)) return;
         sessionStorage.setItem(key, "1");
         location.reload();
