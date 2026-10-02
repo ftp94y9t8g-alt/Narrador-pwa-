@@ -1,11 +1,12 @@
-const CACHE = "narrador-v45";
+const CACHE = "narrador-v46";
 const CORE = [
   "./",
   "./index.html",
-  "./bootstrap-v40.js?v=45",
-  "./pdf-cover-v40.js?v=45",
-  "./home-player-v42.js?v=45",
-  "./library-firsttap-v43.js?v=45",
+  "./bootstrap-v40.js?v=46",
+  "./pdf-cover-v40.js?v=46",
+  "./home-player-v42.js?v=46",
+  "./home-recovery-v46.js?v=46",
+  "./library-firsttap-v43.js?v=46",
   "./styles.css?v=16",
   "./interface-v15.css?v=16",
   "./interface-v16.css?v=16",
@@ -32,11 +33,12 @@ function enhanceHtml(html) {
     .replace(/\s*<script[^>]*src=["']\.\/pdf-cover-v40\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/home-player-v42\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/home-fix-v44\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
+    .replace(/\s*<script[^>]*src=["']\.\/home-recovery-v46\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/library-firsttap-v43\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n");
 
   return cleaned.replace(
     "</head>",
-    '  <script src="./bootstrap-v40.js?v=45"></script>\n  <script type="module" src="./pdf-cover-v40.js?v=45"></script>\n  <script src="./home-player-v42.js?v=45"></script>\n  <script src="./library-firsttap-v43.js?v=45"></script>\n</head>'
+    '  <script src="./bootstrap-v40.js?v=46"></script>\n  <script type="module" src="./pdf-cover-v40.js?v=46"></script>\n  <script src="./home-player-v42.js?v=46"></script>\n  <script src="./home-recovery-v46.js?v=46"></script>\n  <script src="./library-firsttap-v43.js?v=46"></script>\n</head>'
   );
 }
 
@@ -65,11 +67,6 @@ self.addEventListener("activate", (event) => {
     const keys = await caches.keys();
     await Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key)));
     await self.clients.claim();
-
-    const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
-    await Promise.all(windows.map(async (client) => {
-      try { await client.navigate(client.url); } catch (_) {}
-    }));
   })());
 });
 
