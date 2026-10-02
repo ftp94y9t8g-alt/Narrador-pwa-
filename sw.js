@@ -1,11 +1,11 @@
-const CACHE = "narrador-v6";
+const CACHE = "narrador-v7";
 const CORE = [
   "./",
   "./index.html",
-  "./styles.css?v=6",
-  "./app.js?v=6",
-  "./detector-v4.js?v=6",
-  "./kokoro-ios.js?v=6",
+  "./styles.css?v=7",
+  "./app.js?v=7",
+  "./detector-v4.js?v=7",
+  "./kokoro-ios.js?v=7",
   "./manifest.webmanifest",
   "./icon.svg"
 ];
@@ -26,7 +26,7 @@ self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   const url = new URL(event.request.url);
 
-  if (url.origin === self.location.origin && /(?:index\.html|app\.js|styles\.css|detector-v4\.js|kokoro-ios\.js|sw\.js|\/$)/.test(url.pathname)) {
+  if (url.origin === self.location.origin && /(?:index\.html|app\.js|styles\.css|detector-v4\.js|kokoro-ios\.js|\/$)/.test(url.pathname)) {
     event.respondWith(
       fetch(event.request, { cache: "no-store" })
         .then((response) => {
