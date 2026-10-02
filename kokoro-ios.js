@@ -1,33 +1,33 @@
-// Narrador v7: iPhone/Safari compatibility layer for local Kokoro voices.
-// Kokoro.js 1.2.1 loads the model in Safari, but its public voice table currently
-// enables English voices only. Spanish voice files exist in the v1.0 model, so
-// Narrador adds its own Spanish phonemization path and calls generate_from_ids().
+// Narrador v8: iPhone/Safari compatibility layer for local Kokoro voices.
+// Kokoro.js 1.2.1 can run the neural model in Safari, but its bundled phonemizer
+// only exposes English. Narrador uses ephone (eSpeak NG phoneme generation for
+// the web) with the Romance language pack for true Spanish / Latin-American IPA.
 
-const MODULE_URLS = [
+const KOKORO_URLS = [
   "https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/+esm",
   "https://esm.sh/kokoro-js@1.2.1?bundle"
 ];
 
-const PHONEMIZER_URLS = [
-  "https://cdn.jsdelivr.net/npm/phonemizer@1.2.1/+esm",
-  "https://esm.sh/phonemizer@1.2.1?bundle"
+const EPHONE_URLS = [
+  "https://cdn.jsdelivr.net/npm/ephone@1.0.2/ephone.js",
+  "https://unpkg.com/ephone@1.0.2/ephone.js?module"
 ];
 
 let kokoroModulePromise = null;
-let phonemizerModulePromise = null;
+let spanishPhonemizerPromise = null;
 
 function setVoiceNote(message, isError = false) {
   const note = document.querySelector("#aiNote");
   if (!note) return;
   const strong = note.querySelector("strong");
   const span = note.querySelector("span");
-  if (strong) strong.textContent = isError ? "IA local · problema de voz" : "IA local beta · v7";
+  if (strong) strong.textContent = isError ? "IA local · problema de voz" : "IA local beta · v8";
   if (span) span.textContent = message;
 }
 
 function shortError(error) {
   const raw = error?.message || error?.name || String(error || "Error desconocido");
-  return String(raw).replace(/\s+/g, " ").slice(0, 220);
+  return String(raw).replace(/\s+/g, " ").slice(0, 240);
 }
 
 async function importFromFallbacks(urls, validator, label) {
@@ -47,51 +47,67 @@ async function importFromFallbacks(urls, validator, label) {
 
 async function importKokoroModule() {
   if (!kokoroModulePromise) {
-    kokoroModulePromise = importFromFallbacks(MODULE_URLS, mod => !!mod?.KokoroTTS, "Kokoro")
-      .catch(error => { kokoroModulePromise = null; throw error; });
+    kokoroModulePromise = importFromFallbacks(
+      KOKORO_URLS,
+      mod => !!mod?.KokoroTTS,
+      "Kokoro"
+    ).catch(error => {
+      kokoroModulePromise = null;
+      throw error;
+    });
   }
   return kokoroModulePromise;
 }
 
-async function importPhonemizerModule() {
-  if (!phonemizerModulePromise) {
-    phonemizerModulePromise = importFromFallbacks(PHONEMIZER_URLS, mod => typeof mod?.phonemize === "function", "fonetizador español")
-      .catch(error => { phonemizerModulePromise = null; throw error; });
-  }
-  return phonemizerModulePromise;
+async function loadSpanishPhonemizer() {
+  if (spanishPhonemizerPromise) return spanishPhonemizerPromise;
+
+  spanishPhonemizerPromise = (async () => {
+    setVoiceNote("Descargando el pronunciador español local… Esto solo ocurre la primera vez.");
+
+    const mod = await importFromFallbacks(
+      EPHONE_URLS,
+      m => typeof m?.default === "function" && typeof m?.roa === "function",
+      "pronunciador español"
+    );
+
+    // `roa` is Ephone's Romance-language pack and includes both `es` and
+    // `es-419` (Latin-American Spanish). It is loaded only when Spanish is used.
+    const engine = await mod.default(mod.roa);
+    if (!engine || typeof engine.textToIpa !== "function") {
+      throw new Error("El pronunciador cargó sin textToIpa().");
+    }
+
+    const voices = typeof engine.getVoices === "function" ? engine.getVoices() : [];
+    const hasLatAm = Array.isArray(voices) && voices.some(v => String(v?.name || "").toLowerCase() === "es-419");
+    const voice = hasLatAm ? "es-419" : "es";
+    engine.setVoice(voice);
+
+    setVoiceNote(`Pronunciación ${voice === "es-419" ? "latinoamericana" : "española"} lista. Preparando narración neuronal…`);
+    return { engine, voice };
+  })().catch(error => {
+    spanishPhonemizerPromise = null;
+    throw error;
+  });
+
+  return spanishPhonemizerPromise;
 }
 
-const PUNCTUATION_SPLIT = /([;:,.!?¡¿—…"'«»“”(){}\[\]]+)/g;
-const PUNCTUATION_ONLY = /^[;:,.!?¡¿—…"'«»“”(){}\[\]]+$/;
-
 async function phonemizeSpanish(text) {
-  const { phonemize } = await importPhonemizerModule();
-  const pieces = String(text || "").split(PUNCTUATION_SPLIT).filter(Boolean);
-  const out = [];
+  const { engine, voice } = await loadSpanishPhonemizer();
+  engine.setVoice(voice);
 
-  for (const piece of pieces) {
-    if (PUNCTUATION_ONLY.test(piece)) {
-      out.push(piece);
-      continue;
-    }
-    if (!piece.trim()) {
-      out.push(piece);
-      continue;
-    }
+  const normalized = String(text || "")
+    .replace(/\u00ad/g, "")
+    .replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, "'")
+    .trim();
 
-    let result;
-    try {
-      // Latin-American Spanish first; generic Spanish is the fallback.
-      result = await phonemize(piece, "es-419");
-    } catch (_) {
-      result = await phonemize(piece, "es");
-    }
-    const phones = Array.isArray(result) ? result.join(" ") : String(result || "");
-    out.push(phones);
-  }
+  if (!normalized) throw new Error("No hay texto para fonetizar.");
 
-  const phonemes = out.join("").replace(/\s{2,}/g, " ").trim();
-  if (!phonemes) throw new Error("El fonetizador no produjo fonemas para este texto.");
+  const ipa = engine.textToIpa(normalized);
+  const phonemes = String(ipa || "").replace(/\s{2,}/g, " ").trim();
+  if (!phonemes) throw new Error("El pronunciador no produjo fonemas para este texto.");
   return phonemes;
 }
 
@@ -103,9 +119,9 @@ function addSpanishGeneration(tts) {
       return originalGenerate(text, { voice, speed });
     }
 
-    let stage = "fonetización";
+    let stage = "pronunciación";
     try {
-      setVoiceNote("Preparando pronunciación natural en español…");
+      setVoiceNote("Analizando la pronunciación del español…");
       const phonemes = await phonemizeSpanish(text);
 
       stage = "tokenización";
@@ -154,7 +170,7 @@ export class KokoroTTS {
           ...common,
           ...attempt,
         });
-        setVoiceNote("Motor neuronal listo. Preparando soporte de voz en español…");
+        setVoiceNote("Motor neuronal listo. El pronunciador español se cargará al escuchar la primera muestra.");
         return addSpanishGeneration(tts);
       } catch (error) {
         lastError = error;
