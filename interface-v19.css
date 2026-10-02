@@ -1,8 +1,8 @@
-/* Narrador v19: iPhone edit controls + history centering */
+/* Narrador v20: iPhone edit controls + history centering */
 
-/* Make the edit sheet unequivocally interactive on iPhone. */
-.editBookModal{z-index:30000!important;pointer-events:none}
-.editBookModal.open{pointer-events:auto!important}
+/* Closed edit UI is removed from hit-testing entirely. */
+.editBookModal{z-index:30000!important;pointer-events:none!important;visibility:hidden!important;opacity:0!important}
+.editBookModal.open{display:flex!important;pointer-events:auto!important;visibility:visible!important;opacity:1!important}
 .editBookSheet{position:relative;z-index:30001;pointer-events:auto!important}
 #editModalInput{
   pointer-events:auto!important;
@@ -23,14 +23,12 @@
 }
 #coverEditorInput{display:none!important}
 
-/* History: keep the audiobook card mathematically centered in the available viewport. */
+/* History: center the card inside the shell, not against the viewport edge. */
 #historyView{
   width:100%!important;
   max-width:760px!important;
-  margin-left:auto!important;
-  margin-right:auto!important;
-  padding-left:0!important;
-  padding-right:0!important;
+  margin:0 auto!important;
+  padding:0!important;
   box-sizing:border-box!important;
 }
 #historyView .mainHeader,#historyView .historyHead,#historyView>p,#historyList{
@@ -40,17 +38,15 @@
   margin-right:auto!important;
   box-sizing:border-box!important;
 }
-#historyList{padding:0!important}
+#historyList{padding:0!important;display:grid!important;justify-items:center!important}
 #historyList .historyRow{
   width:100%!important;
   max-width:100%!important;
-  margin-left:auto!important;
-  margin-right:auto!important;
+  margin:0 auto!important;
   transform:none!important;
   box-sizing:border-box!important;
 }
 
-/* Preserve the reference-style Home while v19 owns the interactions. */
 #homeView .homeSection,#homeView #continueCard{display:none!important}
 
 @media(max-width:560px){
