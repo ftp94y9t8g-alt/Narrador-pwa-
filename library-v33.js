@@ -1,6 +1,6 @@
-// Narrador v33: stable Library controls + direct native file pickers on iPhone.
-// Import PDF uses a dedicated label/input pair in the Library header.
-// Change cover uses a dedicated label/input pair directly under the book cover.
+// Narrador v34: stable Library controls + the exact Home PDF picker on iPhone.
+// Library + now targets #pdfInput, literally the same native file input used by Home.
+// Book cover changes preserve the full portrait instead of cropping it.
 (() => {
   const DB_NAME = "narrador-db-v1";
   const STORE = "books";
@@ -16,16 +16,16 @@
   let applyingOrder = false;
   let libraryObserver = null;
 
-  if ("serviceWorker" in navigator && !navigator.serviceWorker.__narradorV33Patched) {
+  if ("serviceWorker" in navigator && !navigator.serviceWorker.__narradorV34Patched) {
     const originalRegister = navigator.serviceWorker.register.bind(navigator.serviceWorker);
     navigator.serviceWorker.register = (url, options = {}) => {
       const src = String(url || "");
       if (/sw\.js(?:\?|$)/.test(src)) {
-        return originalRegister("./sw.js?v=33", { ...options, updateViaCache: "none" });
+        return originalRegister("./sw.js?v=34", { ...options, updateViaCache: "none" });
       }
       return originalRegister(url, options);
     };
-    try { navigator.serviceWorker.__narradorV33Patched = true; } catch (_) {}
+    try { navigator.serviceWorker.__narradorV34Patched = true; } catch (_) {}
   }
 
   function toast(message, ms = 2400) {
@@ -92,9 +92,10 @@
   }
 
   function addLibraryStyle() {
-    if ($("#libraryV33Style")) return;
+    if ($("#libraryV34Style")) return;
+    $("#libraryV33Style")?.remove();
     const style = document.createElement("style");
-    style.id = "libraryV33Style";
+    style.id = "libraryV34Style";
     style.textContent = `
       #library .bookRow.libraryFilteredOut{display:none!important}
       #libraryView .filterChip,#libraryView .viewToggle button,#libraryView .organizeBtn{
@@ -111,13 +112,29 @@
         touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none
       }
       .bookCoverChange:active{transform:scale(.97);background:#f3f6ff}
+      .bookCoverColumn #cover.hasCustomCover{
+        background-size:contain!important;background-position:center!important;background-repeat:no-repeat!important;background-color:#fff!important
+      }
       @media(max-width:560px){
         .bookCoverColumn{width:174px;max-width:42vw}
-        .bookCoverColumn #cover{width:100%;height:auto;aspect-ratio:1/1}
+        .bookCoverColumn #cover{width:100%;height:auto;aspect-ratio:2/3}
         .bookCoverChange{font-size:11px;padding:8px 9px}
       }
     `;
     document.head.appendChild(style);
+  }
+
+  // This is intentionally the exact same native picker as Home.
+  // The Library + does NOT use #pdfInput2 anymore; both + labels target #pdfInput.
+  function useExactHomeImportPicker() {
+    const homePlus = $("#homeView .homePlus");
+    const libraryPlus = $("#libraryView .libraryPlus");
+    const homeInput = $("#pdfInput");
+    if (!homePlus || !libraryPlus || !homeInput) return;
+    const target = homePlus.getAttribute("for") || "pdfInput";
+    libraryPlus.setAttribute("for", target);
+    libraryPlus.htmlFor = target;
+    libraryPlus.setAttribute("aria-controls", target);
   }
 
   function replaceNodeWithoutListeners(selector) {
@@ -269,10 +286,10 @@
     const image = await new Promise((resolve,reject)=>{
       const img = new Image(); img.onload=()=>resolve(img); img.onerror=reject; img.src=data;
     });
-    const width=900,height=1200,canvas=document.createElement("canvas");
+    const width=900,height=1350,canvas=document.createElement("canvas");
     canvas.width=width; canvas.height=height;
     const ctx=canvas.getContext("2d"); ctx.fillStyle="#fff"; ctx.fillRect(0,0,width,height);
-    const scale=Math.max(width/image.naturalWidth,height/image.naturalHeight),w=image.naturalWidth*scale,h=image.naturalHeight*scale;
+    const scale=Math.min(width/image.naturalWidth,height/image.naturalHeight),w=image.naturalWidth*scale,h=image.naturalHeight*scale;
     ctx.drawImage(image,(width-w)/2,(height-h)/2,w,h);
     return canvas.toDataURL("image/jpeg",0.9);
   }
@@ -289,15 +306,15 @@
       toast("Portada actualizada.");
       setTimeout(()=>location.reload(),160);
     } catch (error) {
-      console.error("Narrador v33 cover:", error);
+      console.error("Narrador v34 cover:", error);
       toast("No pude usar esa imagen. Prueba con JPG o PNG.", 3800);
     }
   }
 
   function bindBookCoverInput() {
     const input = $("#bookCoverInput");
-    if (!input || input.dataset.v33Bound === "1") return;
-    input.dataset.v33Bound = "1";
+    if (!input || input.dataset.v34Bound === "1") return;
+    input.dataset.v34Bound = "1";
     input.addEventListener("change", (event) => {
       event.stopImmediatePropagation();
       const file = event.target.files?.[0];
@@ -363,7 +380,9 @@
 
   function init() {
     addLibraryStyle();
+    useExactHomeImportPicker();
     resetLibraryToolbarListeners();
+    useExactHomeImportPicker();
     bindBookCoverInput();
     normalizeBookRows();
     applyOrder();
