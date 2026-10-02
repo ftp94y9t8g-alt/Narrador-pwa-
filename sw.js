@@ -1,8 +1,8 @@
-const CACHE = "narrador-v38";
+const CACHE = "narrador-v39";
 const CORE = [
   "./",
   "./index.html",
-  "./bootstrap-v38.js?v=38",
+  "./bootstrap-v38.js?v=39",
   "./styles.css?v=16",
   "./interface-v15.css?v=16",
   "./interface-v16.css?v=16",
@@ -23,8 +23,8 @@ const CORE = [
 ];
 
 function injectBootstrap(html) {
-  if (html.includes("bootstrap-v38.js")) return html;
-  return html.replace("</head>", '  <script src="./bootstrap-v38.js?v=38"></script>\n</head>');
+  const cleaned = html.replace(/\s*<script[^>]*src=["']\.\/bootstrap-v38\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n");
+  return cleaned.replace("</head>", '  <script src="./bootstrap-v38.js?v=39"></script>\n</head>');
 }
 
 async function enhancedHtmlResponse(response) {
@@ -52,8 +52,6 @@ self.addEventListener("activate", (event) => {
     const keys = await caches.keys();
     await Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key)));
     await self.clients.claim();
-
-    // Force already-open installed PWAs onto the repaired HTML once v38 takes control.
     const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
     await Promise.all(windows.map(async (client) => {
       try { await client.navigate(client.url); } catch (_) {}
@@ -76,9 +74,9 @@ self.addEventListener("fetch", (event) => {
         const cache = await caches.open(CACHE);
         await cache.put("./index.html", enhanced.clone());
         return enhanced;
-      } catch (_) {
+      } catch (error) {
         const cached = await caches.match("./index.html") || await caches.match("./");
-        if (!cached) throw _;
+        if (!cached) throw error;
         return enhancedHtmlResponse(cached);
       }
     })());
