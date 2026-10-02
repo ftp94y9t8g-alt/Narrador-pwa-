@@ -3,18 +3,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#0b0b0e" />
+  <meta name="theme-color" content="#f4f6fb" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Narrador" />
   <title>Narrador</title>
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="./styles.css?v=12" />
+  <link rel="stylesheet" href="./styles.css?v=13" />
   <script type="importmap">
   {
     "imports": {
-      "https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/dist/kokoro.web.js": "./kokoro-ios.js?v=12"
+      "https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/dist/kokoro.web.js": "./kokoro-ios.js?v=13"
     }
   }
   </script>
@@ -22,26 +22,29 @@
 <body>
   <main class="shell">
     <header class="topbar">
-      <div>
-        <div class="eyebrow">AUDIOBOOKS</div>
-        <h1>Narrador</h1>
+      <div class="brand">
+        <div class="brandMark">N</div>
+        <div class="brandText">
+          <h1>Narrador</h1>
+          <div class="brandSub">Audiolibros inteligentes</div>
+        </div>
       </div>
       <label class="importBtn" aria-label="Importar PDF">
         <input id="pdfInput" type="file" accept="application/pdf,.pdf" />
-        <span>＋</span>
+        <span class="plus">＋</span>
+        <span class="importText">Importar</span>
       </label>
     </header>
 
     <section id="libraryView" class="view active">
       <div class="welcome">
         <div>
+          <div class="eyebrow">TU ESPACIO DE ESCUCHA</div>
           <h2>Tu biblioteca</h2>
-          <p>Escucha tus libros a tu manera.</p>
+          <p>Convierte tus PDFs en audiolibros y continúa donde los dejaste.</p>
         </div>
-        <label class="secondaryImport">
-          <input id="pdfInput2" type="file" accept="application/pdf,.pdf" />
-          <span>Importar PDF</span>
-        </label>
+        <label class="secondaryImport" for="pdfInput2">Importar PDF</label>
+        <input id="pdfInput2" type="file" accept="application/pdf,.pdf" />
       </div>
 
       <div id="continueCard" class="continueCard hidden"></div>
@@ -57,7 +60,7 @@
       <div id="emptyState" class="empty">
         <div class="emptyArt">♫</div>
         <h3>Aún no hay libros</h3>
-        <p>Importa un PDF y aparecerá aquí.</p>
+        <p>Importa un PDF y Narrador lo organizará por capítulos.</p>
       </div>
     </section>
 
@@ -65,6 +68,7 @@
       <button class="backBtn" data-go="library">‹ Biblioteca</button>
       <div class="processing card">
         <div class="spinner"></div>
+        <div class="eyebrow">PREPARANDO TU LIBRO</div>
         <h2 id="processingTitle">Analizando el libro…</h2>
         <p id="processingStatus">Abriendo el PDF.</p>
         <div class="progress"><div id="progressBar"></div></div>
@@ -84,11 +88,19 @@
       </div>
 
       <div class="card settingsCard">
+        <div class="settingsHeading">
+          <div>
+            <div class="eyebrow">NARRACIÓN</div>
+            <h3>Elige cómo quieres escucharlo</h3>
+          </div>
+          <p>La voz y el progreso se guardan en este dispositivo.</p>
+        </div>
+
         <div class="fieldGrid three">
           <label>Motor de voz
             <select id="engineSelect">
-              <option value="system">iPhone · rápido</option>
-              <option value="kokoro">IA local · más natural (beta)</option>
+              <option value="system">iPhone · instantáneo</option>
+              <option value="kokoro">IA · más natural</option>
             </select>
           </label>
           <label>Idioma
@@ -104,8 +116,8 @@
         </div>
 
         <div id="aiNote" class="aiNote hidden">
-          <strong>IA local beta · v12</strong>
-          <span>Lectura continua con preparación anticipada de las siguientes partes.</span>
+          <strong>Narración con IA</strong>
+          <span>La IA prepara la voz y adelanta las siguientes partes para una reproducción más continua.</span>
         </div>
 
         <div class="fieldGrid">
@@ -147,7 +159,7 @@
 
       <div class="player card">
         <div id="playerCover" class="cover big">NV</div>
-        <div class="eyebrow">AHORA ESCUCHANDO</div>
+        <div class="playerStatus">Narrador está leyendo para ti</div>
         <h2 id="playerChapter">Capítulo</h2>
         <p id="playerBook"></p>
 
@@ -160,6 +172,10 @@
           <button id="nextBtn" aria-label="Siguiente fragmento">↷</button>
         </div>
 
+        <div class="waveform" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+
         <div class="currentText">
           <div class="eyebrow">TEXTO ACTUAL</div>
           <p id="currentText">Pulsa reproducir.</p>
@@ -168,20 +184,26 @@
     </section>
   </main>
 
+  <nav class="bottomNav" aria-label="Navegación principal">
+    <button class="navItem active" type="button" data-go="library"><span class="navIcon">⌂</span><span class="navLabel">Inicio</span></button>
+    <button class="navItem" type="button" data-go="library"><span class="navIcon">▤</span><span class="navLabel">Biblioteca</span></button>
+    <label class="navItem navImport" for="pdfInput2"><span class="navIcon">＋</span><span class="navLabel">Importar</span></label>
+  </nav>
+
   <div id="toast" class="toast"></div>
-  <script src="./ios-audio-v9.js?v=12"></script>
-  <script type="module" src="./ai-boost-v10.js?v=12"></script>
-  <script type="module" src="./detector-v4.js?v=12"></script>
-  <script type="module" src="./app.js?v=12"></script>
-  <script src="./continuous-ai-v12.js?v=12"></script>
+  <script src="./ios-audio-v9.js?v=13"></script>
+  <script type="module" src="./ai-boost-v10.js?v=13"></script>
+  <script type="module" src="./detector-v4.js?v=13"></script>
+  <script type="module" src="./app.js?v=13"></script>
+  <script src="./continuous-ai-v12.js?v=13"></script>
   <script>
     window.addEventListener("load", async () => {
       if (!("serviceWorker" in navigator)) return;
       try {
-        const reg = await navigator.serviceWorker.register("./sw.js?v=12", { updateViaCache: "none" });
+        const reg = await navigator.serviceWorker.register("./sw.js?v=13", { updateViaCache: "none" });
         await reg.update();
         navigator.serviceWorker.addEventListener("controllerchange", () => {
-          const key = "narrador-v12-reloaded";
+          const key = "narrador-v13-reloaded";
           if (sessionStorage.getItem(key)) return;
           sessionStorage.setItem(key, "1");
           location.reload();
