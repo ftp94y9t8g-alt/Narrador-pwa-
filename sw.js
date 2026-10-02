@@ -1,4 +1,4 @@
-const CACHE = "narrador-v30";
+const CACHE = "narrador-v31";
 const CORE = [
   "./",
   "./index.html",
@@ -7,10 +7,10 @@ const CORE = [
   "./interface-v16.css?v=16",
   "./interface-v17.css?v=17",
   "./interface-v18.css?v=18",
-  "./interface-v19.css?v=20",
+  "./interface-v19.css?v=31",
   "./interface-v16.js?v=16",
-  "./interaction-v19.js?v=20",
-  "./file-controls-v30.js?v=30",
+  "./interaction-v19.js?v=31",
+  "./cover-native-v31.js?v=31",
   "./app.js?v=16",
   "./detector-v4.js?v=16",
   "./kokoro-ios.js?v=16",
@@ -22,87 +22,48 @@ const CORE = [
 ];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(CORE)).then(() => self.skipWaiting()));
+  event.waitUntil(
+    caches.open(CACHE)
+      .then((cache) => cache.addAll(CORE))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key))))
       .then(() => self.clients.claim())
   );
 });
 
-function enhanceHtml(html) {
-  if (!html.includes("interface-v17.css")) {
-    html = html.replace("</head>", '  <link rel="stylesheet" href="./interface-v17.css?v=17" />\n</head>');
-  }
-  if (!html.includes("interface-v18.css")) {
-    html = html.replace("</head>", '  <link rel="stylesheet" href="./interface-v18.css?v=18" />\n</head>');
-  }
-  html = html.replace(/<link rel="stylesheet" href="\.\/interface-v19\.css\?v=\d+" \/>\s*/g, "");
-  html = html.replace(/<script src="\.\/interaction-v19\.js\?v=\d+"><\/script>\s*/g, "");
-  html = html.replace(/<script src="\.\/cover-fix-v21\.js\?v=\d+"><\/script>\s*/g, "");
-  html = html.replace(/<script src="\.\/cover-fix-v22\.js\?v=\d+"><\/script>\s*/g, "");
-  html = html.replace(/<script src="\.\/cover-editor-v23\.js\?v=\d+"><\/script>\s*/g, "");
-  html = html.replace(/<script src="\.\/cover-menu-v24\.js\?v=\d+"><\/script>\s*/g, "");
-  html = html.replace(/<script src="\.\/cover-file-v25\.js\?v=\d+"><\/script>\s*/g, "");
-  html = html.replace(/<script src="\.\/file-controls-v26\.js\?v=\d+"><\/script>\s*/g, "");
-  html = html.replace(/<script src="\.\/file-controls-v27\.js\?v=\d+"><\/script>\s*/g, "");
-  html = html.replace(/<script src="\.\/file-controls-v28\.js\?v=\d+"><\/script>\s*/g, "");
-  html = html.replace(/<script src="\.\/file-controls-v29\.js\?v=\d+"><\/script>\s*/g, "");
-  html = html.replace(/<script src="\.\/file-controls-v30\.js\?v=\d+"><\/script>\s*/g, "");
-  html = html.replace("</head>", '  <link rel="stylesheet" href="./interface-v19.css?v=20" />\n</head>');
-  html = html.replace("</body>", '  <script src="./interaction-v19.js?v=20"></script>\n  <script src="./file-controls-v30.js?v=30"></script>\n</body>');
-  return html;
-}
-
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) return;
 
-  const isAppHtml = url.origin === self.location.origin &&
-    (event.request.mode === "navigate" || /(?:index\.html|\/$)/.test(url.pathname));
+  const isNavigation = event.request.mode === "navigate" || /(?:index\.html|\/$)/.test(url.pathname);
 
-  if (isAppHtml) {
-    event.respondWith(
-      fetch(event.request, { cache: "no-store" })
-        .then(async (response) => {
-          const html = enhanceHtml(await response.text());
-          return new Response(html, {
-            status: response.status,
-            statusText: response.statusText,
-            headers: {"Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store"}
-          });
-        })
-        .catch(async () => {
-          const cached = await caches.match("./index.html") || await caches.match("./");
-          if (!cached) throw new Error("Narrador offline HTML unavailable");
-          const html = enhanceHtml(await cached.text());
-          return new Response(html, {headers:{"Content-Type":"text/html; charset=utf-8"}});
-        })
-    );
-    return;
-  }
-
-  if (url.origin === self.location.origin && /(?:app\.js|styles\.css|interface-v15\.css|interface-v16\.css|interface-v17\.css|interface-v18\.css|interface-v19\.css|interface-v16\.js|interaction-v19\.js|file-controls-v30\.js|detector-v4\.js|kokoro-ios\.js|ios-audio-v9\.js|ai-boost-v10\.js|continuous-ai-v12\.js)/.test(url.pathname)) {
+  if (isNavigation) {
     event.respondWith(
       fetch(event.request, { cache: "no-store" })
         .then((response) => {
           const copy = response.clone();
-          caches.open(CACHE).then((cache) => cache.put(event.request, copy)).catch(() => {});
+          caches.open(CACHE).then((cache) => cache.put("./index.html", copy)).catch(() => {});
           return response;
         })
-        .catch(() => caches.match(event.request))
+        .catch(() => caches.match("./index.html").then((cached) => cached || caches.match("./")))
     );
     return;
   }
 
   event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
-      const copy = response.clone();
-      caches.open(CACHE).then((cache) => cache.put(event.request, copy)).catch(() => {});
-      return response;
-    }))
+    fetch(event.request, { cache: "no-store" })
+      .then((response) => {
+        const copy = response.clone();
+        caches.open(CACHE).then((cache) => cache.put(event.request, copy)).catch(() => {});
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
