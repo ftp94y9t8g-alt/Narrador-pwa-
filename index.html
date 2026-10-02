@@ -17,31 +17,86 @@
   <link rel="stylesheet" href="./interface-v18.css?v=18" />
   <link rel="stylesheet" href="./interface-v19.css?v=31" />
   <style>
-    /* v36: the Library + is now covered by the real native file input.
-       iOS taps the input itself; there is no label forwarding or scripted click. */
-    #libraryImportNative{
+    /* v37 — brand new Library importer.
+       The actual visible/clickable control is the native file input itself. */
+    #libraryAddV37{
       position:relative;
+      width:58px;
+      height:58px;
+      flex:0 0 58px;
       overflow:hidden;
+      border-radius:18px;
       -webkit-user-select:none;
       user-select:none;
       -webkit-touch-callout:none;
-      touch-action:manipulation;
     }
-    #libraryImportNative > span{pointer-events:none}
-    #libraryImportNative > #pdfInput2{
+    #libraryAddV37 .libraryAddPlus{
+      position:absolute;
+      inset:0;
+      z-index:3;
+      display:grid;
+      place-items:center;
+      color:#fff;
+      font-size:38px;
+      font-weight:300;
+      line-height:1;
+      pointer-events:none;
+      text-shadow:0 1px 1px rgba(0,0,0,.08);
+    }
+    #libraryAddV37 #pdfInput2{
       display:block!important;
       position:absolute!important;
       inset:0!important;
-      width:100%!important;
-      height:100%!important;
+      z-index:2!important;
+      width:58px!important;
+      height:58px!important;
+      min-width:58px!important;
+      min-height:58px!important;
       margin:0!important;
       padding:0!important;
-      opacity:.001!important;
-      z-index:20!important;
+      border:0!important;
+      border-radius:18px!important;
+      overflow:hidden!important;
+      opacity:1!important;
+      color:transparent!important;
+      background:transparent!important;
+      font-size:0!important;
       cursor:pointer!important;
+      -webkit-appearance:none!important;
+      appearance:none!important;
+      -webkit-user-select:none!important;
+      user-select:none!important;
+      -webkit-touch-callout:none!important;
+      touch-action:manipulation!important;
+    }
+    #libraryAddV37 #pdfInput2::-webkit-file-upload-button{
+      display:block;
+      width:58px;
+      height:58px;
+      margin:0;
+      padding:0;
+      border:0;
+      border-radius:18px;
+      background:linear-gradient(135deg,#4f73ff 0%,#6554ff 100%);
+      color:transparent;
+      font-size:0;
       -webkit-appearance:none;
       appearance:none;
+      box-shadow:0 8px 22px rgba(76,92,255,.26);
     }
+    #libraryAddV37 #pdfInput2::file-selector-button{
+      width:58px;
+      height:58px;
+      margin:0;
+      padding:0;
+      border:0;
+      border-radius:18px;
+      background:linear-gradient(135deg,#4f73ff 0%,#6554ff 100%);
+      color:transparent;
+      font-size:0;
+      box-shadow:0 8px 22px rgba(76,92,255,.26);
+    }
+    #libraryAddV37:active{transform:scale(.96)}
   </style>
   <script type="importmap">
   {
@@ -81,9 +136,9 @@
     <section id="libraryView" class="view">
       <header class="mainHeader">
         <div class="mainBrand"><div class="mainBrandMark">N</div><div><div class="mainBrandName">Narrador</div><div class="mainBrandSub">Mi colección</div></div></div>
-        <div id="libraryImportNative" class="homePlus" aria-label="Importar PDF">
-          <span aria-hidden="true">＋</span>
+        <div id="libraryAddV37" aria-label="Importar PDF">
           <input id="pdfInput2" type="file" accept="application/pdf,.pdf" aria-label="Importar PDF" />
+          <span class="libraryAddPlus" aria-hidden="true">＋</span>
         </div>
       </header>
 
@@ -274,19 +329,19 @@
   <script src="./continuous-ai-v12.js?v=16"></script>
   <script src="./interface-v16.js?v=16"></script>
   <script src="./interaction-v19.js?v=31"></script>
-  <script src="./library-v33.js?v=36"></script>
+  <script src="./library-v33.js?v=37"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", async () => {
         try {
-          const reg = await navigator.serviceWorker.register("./sw.js?v=36", { updateViaCache: "none" });
+          const reg = await navigator.serviceWorker.register("./sw.js?v=37", { updateViaCache: "none" });
           await reg.update();
         } catch (error) {
           console.warn("Narrador: no se pudo actualizar el PWA", error);
         }
       });
       navigator.serviceWorker.addEventListener("controllerchange", () => {
-        const key = "narrador-v36-reloaded";
+        const key = "narrador-v37-reloaded";
         if (sessionStorage.getItem(key)) return;
         sessionStorage.setItem(key, "1");
         location.reload();
