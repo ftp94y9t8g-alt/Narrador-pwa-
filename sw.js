@@ -1,4 +1,4 @@
-const CACHE = "narrador-v32";
+const CACHE = "narrador-v33";
 const CORE = [
   "./",
   "./index.html",
@@ -10,7 +10,7 @@ const CORE = [
   "./interface-v19.css?v=31",
   "./interface-v16.js?v=16",
   "./interaction-v19.js?v=31",
-  "./cover-native-v31.js?v=31",
+  "./library-v33.js?v=33",
   "./app.js?v=16",
   "./detector-v4.js?v=16",
   "./kokoro-ios.js?v=16",
