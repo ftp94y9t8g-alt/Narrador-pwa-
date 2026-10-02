@@ -1,11 +1,11 @@
-const CACHE = "narrador-v7";
+const CACHE = "narrador-v8";
 const CORE = [
   "./",
   "./index.html",
-  "./styles.css?v=7",
-  "./app.js?v=7",
-  "./detector-v4.js?v=7",
-  "./kokoro-ios.js?v=7",
+  "./styles.css?v=8",
+  "./app.js?v=8",
+  "./detector-v4.js?v=8",
+  "./kokoro-ios.js?v=8",
   "./manifest.webmanifest",
   "./icon.svg"
 ];
