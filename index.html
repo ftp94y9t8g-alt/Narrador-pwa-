@@ -10,7 +10,7 @@
   <title>Narrador</title>
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="./styles.css?v=3" />
+  <link rel="stylesheet" href="./styles.css?v=4" />
 </head>
 <body>
   <main class="shell">
@@ -61,7 +61,7 @@
         <h2 id="processingTitle">Analizando el libro…</h2>
         <p id="processingStatus">Abriendo el PDF.</p>
         <div class="progress"><div id="progressBar"></div></div>
-        <small id="processingDetail">El procesamiento ocurre en este dispositivo.</small>
+        <small id="processingDetail">Combinando índice, estructura y formato del PDF.</small>
       </div>
     </section>
 
@@ -162,6 +162,7 @@
   </main>
 
   <div id="toast" class="toast"></div>
-  <script type="module" src="./app.js?v=3"></script>
+  <script type="module" src="./detector-v4.js?v=4"></script>
+  <script type="module" src="./app.js?v=4"></script>
 </body>
 </html>
