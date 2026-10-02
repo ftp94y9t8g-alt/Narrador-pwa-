@@ -10,11 +10,11 @@
   <title>Narrador</title>
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="./styles.css?v=8" />
+  <link rel="stylesheet" href="./styles.css?v=9" />
   <script type="importmap">
   {
     "imports": {
-      "https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/dist/kokoro.web.js": "./kokoro-ios.js?v=8"
+      "https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/dist/kokoro.web.js": "./kokoro-ios.js?v=9"
     }
   }
   </script>
@@ -104,8 +104,8 @@
         </div>
 
         <div id="aiNote" class="aiNote hidden">
-          <strong>IA local beta · v8</strong>
-          <span>Motor neuronal con pronunciación española dedicada. La primera carga puede tardar unos minutos.</span>
+          <strong>IA local beta · v9</strong>
+          <span>Motor neuronal con pronunciación española y reproducción optimizada para iPhone.</span>
         </div>
 
         <div class="fieldGrid">
@@ -169,16 +169,17 @@
   </main>
 
   <div id="toast" class="toast"></div>
-  <script type="module" src="./detector-v4.js?v=8"></script>
-  <script type="module" src="./app.js?v=8"></script>
+  <script src="./ios-audio-v9.js?v=9"></script>
+  <script type="module" src="./detector-v4.js?v=9"></script>
+  <script type="module" src="./app.js?v=9"></script>
   <script>
     window.addEventListener("load", async () => {
       if (!("serviceWorker" in navigator)) return;
       try {
-        const reg = await navigator.serviceWorker.register("./sw.js?v=8", { updateViaCache: "none" });
+        const reg = await navigator.serviceWorker.register("./sw.js?v=9", { updateViaCache: "none" });
         await reg.update();
         navigator.serviceWorker.addEventListener("controllerchange", () => {
-          const key = "narrador-v8-reloaded";
+          const key = "narrador-v9-reloaded";
           if (sessionStorage.getItem(key)) return;
           sessionStorage.setItem(key, "1");
           location.reload();
