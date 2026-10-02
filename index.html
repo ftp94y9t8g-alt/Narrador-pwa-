@@ -10,51 +10,68 @@
   <title>Narrador</title>
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="./styles.css?v=14" />
-  <style>
-    .topbar{justify-content:flex-start}
-    .bottomNav{grid-template-columns:1fr 1fr}
-    @media(max-width:560px){.bottomNav{grid-template-columns:1fr 1fr}}
-  </style>
+  <link rel="stylesheet" href="./styles.css?v=15" />
+  <link rel="stylesheet" href="./interface-v15.css?v=15" />
   <script type="importmap">
   {
     "imports": {
-      "https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/dist/kokoro.web.js": "./kokoro-ios.js?v=14"
+      "https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/dist/kokoro.web.js": "./kokoro-ios.js?v=15"
     }
   }
   </script>
 </head>
-<body>
+<body data-main-tab="home" data-detail-view="0">
   <main class="shell">
-    <header class="topbar">
-      <div class="brand">
-        <div class="brandMark">N</div>
-        <div class="brandText">
-          <h1>Narrador</h1>
-          <div class="brandSub">Audiolibros inteligentes</div>
+    <section id="homeView" class="view active">
+      <header class="mainHeader">
+        <div class="mainBrand">
+          <div class="mainBrandMark">N</div>
+          <div><div class="mainBrandName">Narrador</div><div class="mainBrandSub">Audiolibros inteligentes</div></div>
         </div>
-      </div>
-      <input id="pdfInput" type="file" accept="application/pdf,.pdf" />
-    </header>
+        <label class="homePlus" for="pdfInput" aria-label="Importar PDF">＋</label>
+        <input id="pdfInput" type="file" accept="application/pdf,.pdf" />
+      </header>
 
-    <section id="libraryView" class="view active">
-      <div class="welcome">
-        <div>
-          <div class="eyebrow">TU ESPACIO DE ESCUCHA</div>
-          <h2>Tu biblioteca</h2>
-          <p>Convierte tus PDFs en audiolibros y continúa donde los dejaste.</p>
-        </div>
-        <label class="secondaryImport" for="pdfInput2">Importar PDF</label>
+      <div class="pageIntro">
+        <div class="eyebrow">TU ESPACIO DE ESCUCHA</div>
+        <h2>Inicio</h2>
+        <p>Continúa escuchando o abre uno de tus libros recientes.</p>
+      </div>
+
+      <div id="continueCard" class="continueCard hidden homeHero"></div>
+
+      <div id="homeEmpty" class="homeEmpty">
+        <div class="homeEmptyIcon">♫</div>
+        <h3>Tu próxima historia empieza aquí</h3>
+        <p>Toca el + de arriba para importar tu primer PDF.</p>
+      </div>
+
+      <section class="homeSection">
+        <div class="homeSectionHead"><h3>Recientes</h3><button class="textBtn" type="button" onclick="window.__narradorSetTab?.('library')">Ver biblioteca</button></div>
+        <div id="homeRecent" class="homeRecent"></div>
+      </section>
+    </section>
+
+    <section id="libraryView" class="view">
+      <header class="mainHeader">
+        <div class="mainBrand"><div class="mainBrandMark">N</div><div><div class="mainBrandName">Narrador</div><div class="mainBrandSub">Mi colección</div></div></div>
+      </header>
+
+      <div class="libraryTop">
+        <div><div class="eyebrow">TU COLECCIÓN</div><h2>Mi biblioteca</h2><p>Todos tus libros, organizados en un solo lugar.</p></div>
+        <label class="libraryImport" for="pdfInput2">Importar PDF</label>
         <input id="pdfInput2" type="file" accept="application/pdf,.pdf" />
       </div>
 
-      <div id="continueCard" class="continueCard hidden"></div>
+      <div class="searchBox"><span>⌕</span><input id="librarySearch" type="search" placeholder="Buscar en mi biblioteca…" autocomplete="off" /></div>
+      <div class="filterBar" aria-label="Filtros de biblioteca">
+        <button class="filterChip active" type="button" data-filter="all">Todos</button>
+        <button class="filterChip" type="button" data-filter="recent">Recientes</button>
+        <button class="filterChip" type="button" data-filter="progress">En progreso</button>
+      </div>
 
       <div id="libraryContent">
-        <div class="sectionTitle">
-          <h3>Mis libros</h3>
-          <button id="clearBtn" class="textBtn">Vaciar</button>
-        </div>
+        <div class="sectionTitle"><h3>Mis libros</h3><button id="clearBtn" class="textBtn">Vaciar</button></div>
         <div id="library" class="library"></div>
       </div>
 
@@ -63,6 +80,38 @@
         <h3>Aún no hay libros</h3>
         <p>Importa un PDF y Narrador lo organizará por capítulos.</p>
       </div>
+    </section>
+
+    <section id="historyView" class="view">
+      <header class="mainHeader">
+        <div class="mainBrand"><div class="mainBrandMark">N</div><div><div class="mainBrandName">Narrador</div><div class="mainBrandSub">Tu actividad</div></div></div>
+      </header>
+      <div class="historyHead"><div><div class="eyebrow">RECIENTEMENTE ESCUCHADO</div><h2>Historial</h2></div></div>
+      <p>Vuelve rápidamente al capítulo donde te quedaste.</p>
+      <div id="historyList" class="historyList"></div>
+    </section>
+
+    <section id="settingsView" class="view">
+      <header class="mainHeader">
+        <div class="mainBrand"><div class="mainBrandMark">N</div><div><div class="mainBrandName">Narrador</div><div class="mainBrandSub">Preferencias</div></div></div>
+      </header>
+      <div class="settingsHead"><div><div class="eyebrow">PERSONALIZA TU EXPERIENCIA</div><h2>Ajustes</h2></div></div>
+
+      <div class="settingGroupLabel">Narración</div>
+      <div class="settingsStack">
+        <div class="settingRow"><div class="settingIcon">◉</div><div class="settingText"><strong>Motor predeterminado</strong><span>Elige lectura instantánea o IA</span></div><select id="settingsEngine"><option value="system">iPhone</option><option value="kokoro">IA</option></select></div>
+        <div class="settingRow"><div class="settingIcon">◎</div><div class="settingText"><strong>Idioma</strong><span>Detección automática o idioma fijo</span></div><select id="settingsLanguage"><option value="auto">Automático</option><option value="es">Español</option><option value="en">English</option></select></div>
+        <div class="settingRow"><div class="settingIcon">✦</div><div class="settingText"><strong>Estilo de lectura</strong><span>Tono predeterminado</span></div><select id="settingsStyle"><option value="warm">Cálida</option><option value="cinematic">Cinematográfica</option><option value="expressive">Expresiva</option><option value="calm">Calmada</option></select></div>
+        <div class="settingRow"><div class="settingIcon">↗</div><div class="settingText"><strong>Velocidad</strong><span>Ritmo predeterminado</span></div><select id="settingsSpeed"><option value="0.85">0.85×</option><option value="0.95">0.95×</option><option value="1.00">1.00×</option><option value="1.10">1.10×</option></select></div>
+      </div>
+
+      <div class="settingGroupLabel">Aplicación</div>
+      <div class="settingsStack">
+        <button id="notificationsRow" class="settingRow" type="button"><div class="settingIcon">♢</div><div class="settingText"><strong>Notificaciones</strong><span id="notificationState">Toca para permitir avisos</span></div><div class="settingAction">›</div></button>
+        <div class="settingRow"><div class="settingIcon">▣</div><div class="settingText"><strong>Almacenamiento offline</strong><span id="storageLabel">Calculando espacio…</span><div class="storageBar"><i id="storageBarFill"></i></div></div></div>
+        <div class="settingRow"><div class="settingIcon">ⓘ</div><div class="settingText"><strong>Acerca de Narrador</strong><span>Convierte PDFs en experiencias de audio</span></div></div>
+      </div>
+      <div class="settingsNote">Cuando añadamos la generación completa de audiolibros, esta sección también controlará descargas offline, calidad de audio y el aviso “Tu audiolibro está listo”.</div>
     </section>
 
     <section id="processingView" class="view">
@@ -81,145 +130,70 @@
       <button class="backBtn" data-go="library">‹ Biblioteca</button>
       <div class="bookHeader card">
         <div id="cover" class="cover">NV</div>
-        <div class="grow">
-          <div class="eyebrow">AUDIOBOOK</div>
-          <h2 id="bookTitle">Libro</h2>
-          <p id="bookMeta"></p>
-        </div>
+        <div class="grow"><div class="eyebrow">AUDIOBOOK</div><h2 id="bookTitle">Libro</h2><p id="bookMeta"></p></div>
       </div>
 
       <div class="card settingsCard">
-        <div class="settingsHeading">
-          <div>
-            <div class="eyebrow">NARRACIÓN</div>
-            <h3>Elige cómo quieres escucharlo</h3>
-          </div>
-          <p>La voz y el progreso se guardan en este dispositivo.</p>
-        </div>
-
+        <div class="settingsHeading"><div><div class="eyebrow">NARRACIÓN</div><h3>Elige cómo quieres escucharlo</h3></div><p>La voz y el progreso se guardan en este dispositivo.</p></div>
         <div class="fieldGrid three">
-          <label>Motor de voz
-            <select id="engineSelect">
-              <option value="system">iPhone · instantáneo</option>
-              <option value="kokoro">IA · más natural</option>
-            </select>
-          </label>
-          <label>Idioma
-            <select id="languageSelect">
-              <option value="auto">Automático</option>
-              <option value="es">Español</option>
-              <option value="en">English</option>
-            </select>
-          </label>
-          <label>Voz
-            <select id="voiceSelect"></select>
-          </label>
+          <label>Motor de voz<select id="engineSelect"><option value="system">iPhone · instantáneo</option><option value="kokoro">IA · más natural</option></select></label>
+          <label>Idioma<select id="languageSelect"><option value="auto">Automático</option><option value="es">Español</option><option value="en">English</option></select></label>
+          <label>Voz<select id="voiceSelect"></select></label>
         </div>
-
-        <div id="aiNote" class="aiNote hidden">
-          <strong>Narración con IA</strong>
-          <span>La IA prepara la voz y adelanta las siguientes partes para una reproducción más continua.</span>
-        </div>
-
+        <div id="aiNote" class="aiNote hidden"><strong>Narración con IA</strong><span>La IA prepara la voz y adelanta las siguientes partes para una reproducción más continua.</span></div>
         <div class="fieldGrid">
-          <label>Estilo
-            <select id="styleSelect">
-              <option value="warm">Cálida</option>
-              <option value="cinematic">Cinematográfica</option>
-              <option value="expressive">Expresiva</option>
-              <option value="calm">Calmada</option>
-            </select>
-          </label>
-          <label class="rangeLabel">Velocidad
-            <input id="speedRange" type="range" min="0.80" max="1.15" step="0.05" value="0.95" />
-            <span id="speedLabel">0.95×</span>
-          </label>
+          <label>Estilo<select id="styleSelect"><option value="warm">Cálida</option><option value="cinematic">Cinematográfica</option><option value="expressive">Expresiva</option><option value="calm">Calmada</option></select></label>
+          <label class="rangeLabel">Velocidad<input id="speedRange" type="range" min="0.80" max="1.15" step="0.05" value="0.95" /><span id="speedLabel">0.95×</span></label>
         </div>
-
         <button id="previewBtn" class="primary">▶ Escuchar muestra</button>
       </div>
-
       <div class="sectionTitle"><h3>Capítulos</h3><span id="chapterCount"></span></div>
       <div id="chapters" class="chapters"></div>
     </section>
 
     <section id="playerView" class="view">
       <button class="backBtn" data-go="book">‹ Libro</button>
-
       <div class="chapterPicker card compactCard">
-        <label>Capítulo
-          <select id="playerChapterSelect">
-            <option>Cargando capítulos…</option>
-          </select>
-        </label>
-        <div class="chapterNavBtns">
-          <button id="prevChapterBtn">‹ Anterior</button>
-          <button id="nextChapterBtn">Siguiente ›</button>
-        </div>
+        <label>Capítulo<select id="playerChapterSelect"><option>Cargando capítulos…</option></select></label>
+        <div class="chapterNavBtns"><button id="prevChapterBtn">‹ Anterior</button><button id="nextChapterBtn">Siguiente ›</button></div>
       </div>
-
       <div class="player card">
         <div id="playerCover" class="cover big">NV</div>
         <div class="playerStatus">Narrador está leyendo para ti</div>
-        <h2 id="playerChapter">Capítulo</h2>
-        <p id="playerBook"></p>
-
+        <h2 id="playerChapter">Capítulo</h2><p id="playerBook"></p>
         <div class="progress playerProgress"><div id="speechProgress"></div></div>
         <div class="progressMeta"><span id="speechPercent">0%</span><span id="speechSegment">0%</span></div>
-
-        <div class="transport">
-          <button id="prevBtn" aria-label="Fragmento anterior">↶</button>
-          <button id="playBtn" class="playBtn" aria-label="Reproducir">▶</button>
-          <button id="nextBtn" aria-label="Siguiente fragmento">↷</button>
-        </div>
-
-        <div class="waveform" aria-hidden="true">
-          <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-        </div>
-
-        <div class="currentText">
-          <div class="eyebrow">TEXTO ACTUAL</div>
-          <p id="currentText">Pulsa reproducir.</p>
-        </div>
+        <div class="transport"><button id="prevBtn" aria-label="Fragmento anterior">↶</button><button id="playBtn" class="playBtn" aria-label="Reproducir">▶</button><button id="nextBtn" aria-label="Siguiente fragmento">↷</button></div>
+        <div class="waveform" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="currentText"><div class="eyebrow">TEXTO ACTUAL</div><p id="currentText">Pulsa reproducir.</p></div>
       </div>
     </section>
   </main>
 
-  <nav class="bottomNav" aria-label="Navegación principal">
-    <button class="navItem active" type="button" data-go="library" data-section="home"><span class="navIcon">⌂</span><span class="navLabel">Inicio</span></button>
-    <button class="navItem" type="button" data-go="library" data-section="library"><span class="navIcon">▤</span><span class="navLabel">Biblioteca</span></button>
+  <nav class="bottomNav fourTabs" aria-label="Navegación principal">
+    <button class="navItem active" type="button" data-tab="home"><span class="navIcon">⌂</span><span class="navLabel">Inicio</span></button>
+    <button class="navItem" type="button" data-tab="library"><span class="navIcon">▤</span><span class="navLabel">Biblioteca</span></button>
+    <button class="navItem" type="button" data-tab="history"><span class="navIcon">◷</span><span class="navLabel">Historial</span></button>
+    <button class="navItem" type="button" data-tab="settings"><span class="navIcon">⚙</span><span class="navLabel">Ajustes</span></button>
   </nav>
 
   <div id="toast" class="toast"></div>
-  <script src="./ios-audio-v9.js?v=14"></script>
-  <script type="module" src="./ai-boost-v10.js?v=14"></script>
-  <script type="module" src="./detector-v4.js?v=14"></script>
-  <script type="module" src="./app.js?v=14"></script>
-  <script src="./continuous-ai-v12.js?v=14"></script>
+  <script src="./ios-audio-v9.js?v=15"></script>
+  <script type="module" src="./ai-boost-v10.js?v=15"></script>
+  <script type="module" src="./detector-v4.js?v=15"></script>
+  <script type="module" src="./app.js?v=15"></script>
+  <script src="./continuous-ai-v12.js?v=15"></script>
+  <script src="./interface-v15.js?v=15"></script>
   <script>
-    document.addEventListener("click", (event) => {
-      const item = event.target.closest?.(".bottomNav .navItem[data-section]");
-      if (!item) return;
-      document.querySelectorAll(".bottomNav .navItem").forEach((el) => el.classList.toggle("active", el === item));
-      const target = item.dataset.section;
-      setTimeout(() => {
-        if (target === "library") {
-          document.querySelector("#libraryContent")?.scrollIntoView({ behavior: "smooth", block: "start" });
-        } else {
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        }
-      }, 80);
-    });
-
     window.addEventListener("load", async () => {
       if (!("serviceWorker" in navigator)) return;
       try {
-        const reg = await navigator.serviceWorker.register("./sw.js?v=14", { updateViaCache: "none" });
+        const reg = await navigator.serviceWorker.register("./sw.js?v=15", { updateViaCache: "none" });
         await reg.update();
         navigator.serviceWorker.addEventListener("controllerchange", () => {
-          const key = "narrador-v14-reloaded";
+          const key = "narrador-v15-reloaded";
           if (sessionStorage.getItem(key)) return;
-          sessionStorage.setItem(key, "1");
+          sessionStorage.setItem(key,"1");
           location.reload();
         });
       } catch (error) {
