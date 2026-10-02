@@ -1,7 +1,6 @@
-// Narrador v8: iPhone/Safari compatibility layer for local Kokoro voices.
-// Kokoro.js 1.2.1 can run the neural model in Safari, but its bundled phonemizer
-// only exposes English. Narrador uses ephone (eSpeak NG phoneme generation for
-// the web) with the Romance language pack for true Spanish / Latin-American IPA.
+// Narrador v10: low-latency iPhone/Safari compatibility layer for local Kokoro voices.
+// Uses WebGPU first when Safari exposes it, falls back to WASM, preloads the
+// Spanish phonemizer, and reuses generated audio within the session.
 
 const KOKORO_URLS = [
   "https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/+esm",
@@ -15,13 +14,14 @@ const EPHONE_URLS = [
 
 let kokoroModulePromise = null;
 let spanishPhonemizerPromise = null;
+let singletonPromise = null;
 
 function setVoiceNote(message, isError = false) {
   const note = document.querySelector("#aiNote");
   if (!note) return;
   const strong = note.querySelector("strong");
   const span = note.querySelector("span");
-  if (strong) strong.textContent = isError ? "IA local · problema de voz" : "IA local beta · v8";
+  if (strong) strong.textContent = isError ? "IA local · problema de voz" : "IA local beta · v10";
   if (span) span.textContent = message;
 }
 
@@ -63,7 +63,7 @@ async function loadSpanishPhonemizer() {
   if (spanishPhonemizerPromise) return spanishPhonemizerPromise;
 
   spanishPhonemizerPromise = (async () => {
-    setVoiceNote("Descargando el pronunciador español local… Esto solo ocurre la primera vez.");
+    setVoiceNote("Preparando pronunciación española local…");
 
     const mod = await importFromFallbacks(
       EPHONE_URLS,
@@ -71,8 +71,6 @@ async function loadSpanishPhonemizer() {
       "pronunciador español"
     );
 
-    // `roa` is Ephone's Romance-language pack and includes both `es` and
-    // `es-419` (Latin-American Spanish). It is loaded only when Spanish is used.
     const engine = await mod.default(mod.roa);
     if (!engine || typeof engine.textToIpa !== "function") {
       throw new Error("El pronunciador cargó sin textToIpa().");
@@ -83,7 +81,6 @@ async function loadSpanishPhonemizer() {
     const voice = hasLatAm ? "es-419" : "es";
     engine.setVoice(voice);
 
-    setVoiceNote(`Pronunciación ${voice === "es-419" ? "latinoamericana" : "española"} lista. Preparando narración neuronal…`);
     return { engine, voice };
   })().catch(error => {
     spanishPhonemizerPromise = null;
@@ -111,17 +108,20 @@ async function phonemizeSpanish(text) {
   return phonemes;
 }
 
-function addSpanishGeneration(tts) {
+function addNarradorGeneration(tts) {
   const originalGenerate = tts.generate.bind(tts);
+  const cache = new Map();
+  const pending = new Map();
+  const MAX_CACHE = 10;
 
-  tts.generate = async (text, { voice = "af_heart", speed = 1 } = {}) => {
+  async function generateUncached(text, { voice = "af_heart", speed = 1 } = {}) {
     if (!/^e[fm]_/.test(voice)) {
       return originalGenerate(text, { voice, speed });
     }
 
     let stage = "pronunciación";
     try {
-      setVoiceNote("Analizando la pronunciación del español…");
+      setVoiceNote("Analizando pronunciación…");
       const phonemes = await phonemizeSpanish(text);
 
       stage = "tokenización";
@@ -130,55 +130,103 @@ function addSpanishGeneration(tts) {
       if (!input_ids) throw new Error("El tokenizador no devolvió input_ids.");
 
       stage = "síntesis";
-      setVoiceNote("Generando audio neuronal en español…");
+      setVoiceNote("Generando audio neuronal…");
       const audio = await tts.generate_from_ids(input_ids, { voice, speed });
       if (!audio) throw new Error("El motor no devolvió audio.");
 
-      setVoiceNote("Voz IA en español lista. El audio se genera localmente en este iPhone.");
+      setVoiceNote(`Voz IA lista · ${tts.narradorDevice === "webgpu" ? "GPU" : "modo compatible"}.`);
       return audio;
     } catch (error) {
       console.error(`Narrador: error durante ${stage}`, error);
       setVoiceNote(`Falló la ${stage}: ${shortError(error)}`, true);
       throw error;
     }
+  }
+
+  tts.generate = async (text, { voice = "af_heart", speed = 1 } = {}) => {
+    const normalizedText = String(text || "").trim();
+    const key = `${voice}|${Number(speed).toFixed(3)}|${normalizedText}`;
+    if (cache.has(key)) return cache.get(key);
+    if (pending.has(key)) return pending.get(key);
+
+    const job = generateUncached(normalizedText, { voice, speed })
+      .then(audio => {
+        cache.set(key, audio);
+        while (cache.size > MAX_CACHE) cache.delete(cache.keys().next().value);
+        return audio;
+      })
+      .finally(() => pending.delete(key));
+
+    pending.set(key, job);
+    return job;
   };
 
+  tts.prepareLanguage = async (language = "es") => {
+    if (String(language).toLowerCase().startsWith("es")) {
+      await loadSpanishPhonemizer();
+    }
+    return true;
+  };
+
+  tts.clearNarradorCache = () => cache.clear();
   return tts;
 }
 
 export class KokoroTTS {
   static async from_pretrained(modelId, options = {}) {
-    setVoiceNote("Preparando el motor neuronal para iPhone. La primera vez puede tardar unos minutos.");
-    const mod = await importKokoroModule();
-    const BaseKokoroTTS = mod.KokoroTTS;
+    if (singletonPromise) return singletonPromise;
 
-    const common = { ...options };
-    delete common.dtype;
-    delete common.device;
+    singletonPromise = (async () => {
+      setVoiceNote("Preparando el motor neuronal… Narrador lo dejará listo antes de reproducir.");
+      const mod = await importKokoroModule();
+      const BaseKokoroTTS = mod.KokoroTTS;
 
-    // q4 is attempted first to lower RAM use on iPhone. q8 is the fallback.
-    const attempts = [
-      { dtype: "q4", device: "wasm" },
-      { dtype: "q8", device: "wasm" }
-    ];
+      const common = { ...options };
+      delete common.dtype;
+      delete common.device;
 
-    let lastError = null;
-    for (const attempt of attempts) {
-      try {
-        setVoiceNote(`Cargando modelo ${attempt.dtype.toUpperCase()}… Mantén Narrador abierto durante la primera carga.`);
-        const tts = await BaseKokoroTTS.from_pretrained(modelId, {
-          ...common,
-          ...attempt,
-        });
-        setVoiceNote("Motor neuronal listo. El pronunciador español se cargará al escuchar la primera muestra.");
-        return addSpanishGeneration(tts);
-      } catch (error) {
-        lastError = error;
-        console.warn(`Narrador: Kokoro ${attempt.dtype} falló`, error);
+      const attempts = [];
+      if (typeof navigator !== "undefined" && navigator.gpu) {
+        attempts.push({ dtype: "q4", device: "webgpu", label: "GPU" });
       }
-    }
+      attempts.push(
+        { dtype: "q4", device: "wasm", label: "WASM Q4" },
+        { dtype: "q8", device: "wasm", label: "WASM Q8" }
+      );
 
-    setVoiceNote(`No pudo iniciarse el motor neuronal: ${shortError(lastError)}`, true);
-    throw lastError || new Error("No se pudo iniciar Kokoro en este iPhone.");
+      let lastError = null;
+      for (const attempt of attempts) {
+        try {
+          setVoiceNote(`Cargando IA con ${attempt.label}… La primera preparación puede tardar.`);
+          const base = await BaseKokoroTTS.from_pretrained(modelId, {
+            ...common,
+            dtype: attempt.dtype,
+            device: attempt.device,
+          });
+          base.narradorDevice = attempt.device;
+          const tts = addNarradorGeneration(base);
+
+          // Start the Spanish pronunciation engine immediately instead of waiting
+          // for the first Play tap. This runs in parallel and is reused later.
+          loadSpanishPhonemizer().catch(error => {
+            console.warn("Narrador: el pronunciador español se cargará al necesitarlo", error);
+          });
+
+          setVoiceNote(`Motor neuronal listo · ${attempt.device === "webgpu" ? "aceleración GPU" : "modo compatible"}.`);
+          return tts;
+        } catch (error) {
+          lastError = error;
+          console.warn(`Narrador: Kokoro ${attempt.label} falló`, error);
+        }
+      }
+
+      setVoiceNote(`No pudo iniciarse el motor neuronal: ${shortError(lastError)}`, true);
+      throw lastError || new Error("No se pudo iniciar Kokoro en este iPhone.");
+    })().catch(error => {
+      singletonPromise = null;
+      throw error;
+    });
+
+    return singletonPromise;
   }
 }
