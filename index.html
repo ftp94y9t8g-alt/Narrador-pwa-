@@ -3,49 +3,54 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#0d0d10" />
+  <meta name="theme-color" content="#0b0b0e" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Narrador" />
   <title>Narrador</title>
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./styles.css?v=3" />
 </head>
 <body>
   <main class="shell">
     <header class="topbar">
       <div>
-        <div class="eyebrow">AUDIOBOOK STUDIO</div>
+        <div class="eyebrow">AUDIOBOOKS</div>
         <h1>Narrador</h1>
       </div>
-      <label class="importBtn">
+      <label class="importBtn" aria-label="Importar PDF">
         <input id="pdfInput" type="file" accept="application/pdf,.pdf" />
-        <span>+ PDF</span>
+        <span>＋</span>
       </label>
     </header>
 
     <section id="libraryView" class="view active">
-      <div class="hero card">
-        <span class="pill">Desarrollo $0 · procesamiento local</span>
-        <h2>Convierte un PDF en una experiencia de audiolibro.</h2>
-        <p>Importa un libro, detecta capítulos y escúchalo directamente desde tu iPhone. El texto permanece en tu dispositivo.</p>
-        <label class="primary uploadLarge">
+      <div class="welcome">
+        <div>
+          <h2>Tu biblioteca</h2>
+          <p>Escucha tus libros a tu manera.</p>
+        </div>
+        <label class="secondaryImport">
           <input id="pdfInput2" type="file" accept="application/pdf,.pdf" />
-          <span>Importar un PDF</span>
+          <span>Importar PDF</span>
         </label>
-        <small>Usa únicamente contenido que tengas derecho a convertir para uso personal.</small>
       </div>
 
-      <div class="sectionTitle">
-        <h3>Tu biblioteca</h3>
-        <button id="clearBtn" class="textBtn">Vaciar</button>
+      <div id="continueCard" class="continueCard hidden"></div>
+
+      <div id="libraryContent">
+        <div class="sectionTitle">
+          <h3>Mis libros</h3>
+          <button id="clearBtn" class="textBtn">Vaciar</button>
+        </div>
+        <div id="library" class="library"></div>
       </div>
-      <div id="library" class="library"></div>
-      <div id="emptyState" class="empty card">
-        <div class="emptyIcon">◫</div>
+
+      <div id="emptyState" class="empty">
+        <div class="emptyArt">♫</div>
         <h3>Aún no hay libros</h3>
-        <p>Tu primer PDF aparecerá aquí.</p>
+        <p>Importa un PDF y aparecerá aquí.</p>
       </div>
     </section>
 
@@ -93,7 +98,7 @@
 
         <div id="aiNote" class="aiNote hidden">
           <strong>IA local beta</strong>
-          <span>La primera vez descarga un modelo abierto al iPhone. No hay suscripción ni pago por uso. Puede tardar y consumir varios cientos de MB.</span>
+          <span>La primera vez descarga el modelo al iPhone. No hay pago por uso.</span>
         </div>
 
         <div class="fieldGrid">
@@ -122,8 +127,10 @@
       <button class="backBtn" data-go="book">‹ Libro</button>
 
       <div class="chapterPicker card compactCard">
-        <label>Ir a capítulo
-          <select id="playerChapterSelect"></select>
+        <label>Capítulo
+          <select id="playerChapterSelect">
+            <option>Cargando capítulos…</option>
+          </select>
         </label>
         <div class="chapterNavBtns">
           <button id="prevChapterBtn">‹ Anterior</button>
@@ -133,12 +140,12 @@
 
       <div class="player card">
         <div id="playerCover" class="cover big">NV</div>
-        <div class="eyebrow">REPRODUCIENDO</div>
+        <div class="eyebrow">AHORA ESCUCHANDO</div>
         <h2 id="playerChapter">Capítulo</h2>
         <p id="playerBook"></p>
 
         <div class="progress playerProgress"><div id="speechProgress"></div></div>
-        <div class="progressMeta"><span id="speechPercent">0%</span><span id="speechSegment">0 / 0</span></div>
+        <div class="progressMeta"><span id="speechPercent">0%</span><span id="speechSegment">0%</span></div>
 
         <div class="transport">
           <button id="prevBtn" aria-label="Fragmento anterior">↶</button>
@@ -155,6 +162,6 @@
   </main>
 
   <div id="toast" class="toast"></div>
-  <script type="module" src="./app.js"></script>
+  <script type="module" src="./app.js?v=3"></script>
 </body>
 </html>
