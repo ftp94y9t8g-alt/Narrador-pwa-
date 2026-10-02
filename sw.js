@@ -1,4 +1,4 @@
-const CACHE = "narrador-v31";
+const CACHE = "narrador-v32";
 const CORE = [
   "./",
   "./index.html",
