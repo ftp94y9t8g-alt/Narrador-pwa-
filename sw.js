@@ -1,4 +1,4 @@
-const CACHE = "narrador-v17";
+const CACHE = "narrador-v18";
 const CORE = [
   "./",
   "./index.html",
@@ -6,8 +6,10 @@ const CORE = [
   "./interface-v15.css?v=16",
   "./interface-v16.css?v=16",
   "./interface-v17.css?v=17",
+  "./interface-v18.css?v=18",
   "./interface-v16.js?v=16",
   "./nav-fix-v17.js?v=17",
+  "./interaction-v18.js?v=18",
   "./app.js?v=16",
   "./detector-v4.js?v=16",
   "./kokoro-ios.js?v=16",
@@ -34,8 +36,14 @@ function enhanceHtml(html) {
   if (!html.includes("interface-v17.css")) {
     html = html.replace("</head>", '  <link rel="stylesheet" href="./interface-v17.css?v=17" />\n</head>');
   }
+  if (!html.includes("interface-v18.css")) {
+    html = html.replace("</head>", '  <link rel="stylesheet" href="./interface-v18.css?v=18" />\n</head>');
+  }
   if (!html.includes("nav-fix-v17.js")) {
     html = html.replace("</body>", '  <script src="./nav-fix-v17.js?v=17"></script>\n</body>');
+  }
+  if (!html.includes("interaction-v18.js")) {
+    html = html.replace("</body>", '  <script src="./interaction-v18.js?v=18"></script>\n</body>');
   }
   return html;
 }
@@ -68,7 +76,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (url.origin === self.location.origin && /(?:app\.js|styles\.css|interface-v15\.css|interface-v16\.css|interface-v17\.css|interface-v16\.js|nav-fix-v17\.js|detector-v4\.js|kokoro-ios\.js|ios-audio-v9\.js|ai-boost-v10\.js|continuous-ai-v12\.js)/.test(url.pathname)) {
+  if (url.origin === self.location.origin && /(?:app\.js|styles\.css|interface-v15\.css|interface-v16\.css|interface-v17\.css|interface-v18\.css|interface-v16\.js|nav-fix-v17\.js|interaction-v18\.js|detector-v4\.js|kokoro-ios\.js|ios-audio-v9\.js|ai-boost-v10\.js|continuous-ai-v12\.js)/.test(url.pathname)) {
     event.respondWith(
       fetch(event.request, { cache: "no-store" })
         .then((response) => {
