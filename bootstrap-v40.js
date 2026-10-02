@@ -1,7 +1,24 @@
-// Narrador v40 — rebuild Library import to exactly match the proven Home control.
-// No moving inputs, no overlays, no scripted click, no pointer handlers.
-// The Library control is simply: <label for="pdfInput2">+</label> + hidden <input id="pdfInput2" type="file">.
+// Narrador v48 — stable bootstrap + Library PDF picker.
+// IMPORTANT: constrain observers on #homeFeatured to direct-child mutations only.
+// v45 accidentally observed deep text/attribute changes and then changed those same
+// nodes inside its callback, creating a MutationObserver feedback loop that could
+// starve iOS Safari's event loop and make every button appear dead.
 (() => {
+  if (!window.__narradorHomeObserverGuard && window.MutationObserver) {
+    const NativeMutationObserver = window.MutationObserver;
+    window.MutationObserver = class NarradorMutationObserver extends NativeMutationObserver {
+      observe(target, options = {}) {
+        if (target?.id === "homeFeatured" && options?.childList) {
+          options = { ...options, childList: true, subtree: false, attributes: false };
+          delete options.attributeFilter;
+          delete options.attributeOldValue;
+        }
+        return super.observe(target, options);
+      }
+    };
+    window.__narradorHomeObserverGuard = true;
+  }
+
   // Keep every legacy registration on one stable service-worker URL and prevent
   // library-v33 from forcing an old v34 worker back onto installed PWAs.
   if ("serviceWorker" in navigator) {
@@ -16,7 +33,7 @@
       };
       try { navigator.serviceWorker.__narradorV34Patched = true; } catch (_) {}
     } catch (error) {
-      console.warn("Narrador v40: no se pudo normalizar el service worker", error);
+      console.warn("Narrador v48: no se pudo normalizar el service worker", error);
     }
   }
 
