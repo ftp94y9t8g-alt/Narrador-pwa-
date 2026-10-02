@@ -1,12 +1,32 @@
-// Narrador v30: iPhone-native file controls that remain real, visible browser controls.
-// The v29 overlays were fully transparent. iOS Home Screen PWAs can ignore those.
-// v30 keeps the actual <input type="file"> rendered at opacity 1 and only makes
-// the browser button text transparent, so the user's finger lands on the native control.
+// Narrador v30.1: stable iPhone-native file controls.
+// Keep a real native <input type="file"> under the user's finger and avoid
+// repeated DOM observers / competing service-worker registrations.
 (() => {
   const DB_NAME = "narrador-db-v1";
   const STORE = "books";
   const $ = (s) => document.querySelector(s);
   let currentBookId = "";
+
+  // index.html and app.js currently register the same service worker with
+  // different query strings. Normalize both calls so iOS does not keep
+  // treating the worker as a new script on every launch.
+  try {
+    const sw = navigator.serviceWorker;
+    if (sw && !sw.__narradorStableRegister) {
+      const originalRegister = sw.register.bind(sw);
+      sw.register = (url, options = {}) => {
+        const value = String(url || "");
+        if (/sw\.js(?:\?|$)/.test(value)) {
+          return originalRegister("./sw.js?v=30-stable", {
+            ...options,
+            updateViaCache: "none"
+          });
+        }
+        return originalRegister(url, options);
+      };
+      sw.__narradorStableRegister = true;
+    }
+  } catch (_) {}
 
   function toast(message, ms = 2600) {
     const el = $("#toast");
@@ -83,9 +103,9 @@
       book.coverDataUrl = await imageToCover(file);
       await putBook(book);
       toast("Portada actualizada.");
-      setTimeout(() => location.reload(), 220);
+      setTimeout(() => location.reload(), 180);
     } catch (error) {
-      console.error("Narrador v30 cover:", error);
+      console.error("Narrador v30.1 cover:", error);
       toast("No pude usar esa imagen. Prueba con otra.", 3800);
     }
   }
@@ -95,19 +115,24 @@
     input.classList.add("nativeFileInputV30");
     input.style.setProperty("display", "block", "important");
     input.style.setProperty("position", "absolute", "important");
-    input.style.setProperty("left", "0", "important");
-    input.style.setProperty("top", "0", "important");
+    input.style.setProperty("inset", "0", "important");
     input.style.setProperty("width", "100%", "important");
     input.style.setProperty("height", "100%", "important");
+    input.style.setProperty("min-width", "100%", "important");
+    input.style.setProperty("min-height", "100%", "important");
     input.style.setProperty("opacity", "1", "important");
     input.style.setProperty("z-index", "50", "important");
     input.style.setProperty("pointer-events", "auto", "important");
+    input.style.setProperty("touch-action", "auto", "important");
     input.style.setProperty("cursor", "pointer", "important");
     input.style.setProperty("margin", "0", "important");
     input.style.setProperty("padding", "0", "important");
     input.style.setProperty("border", "0", "important");
     input.style.setProperty("border-radius", "inherit", "important");
-    input.style.setProperty("font-size", "0", "important");
+    // A large native font size expands WebKit's internal file-button hit area.
+    // The button remains visually transparent through the pseudo-element CSS.
+    input.style.setProperty("font-size", "100px", "important");
+    input.style.setProperty("text-align", "right", "important");
     input.style.setProperty("color", "transparent", "important");
     input.style.setProperty("background", "transparent", "important");
     input.dataset.nativeKindV30 = kind;
@@ -129,7 +154,6 @@
 
     host.style.position = "relative";
     host.style.overflow = "hidden";
-    host.style.touchAction = "manipulation";
     input.type = "file";
     input.accept = "application/pdf,.pdf";
     input.removeAttribute("hidden");
@@ -156,7 +180,6 @@
 
     host.style.position = "relative";
     host.style.overflow = "hidden";
-    host.style.touchAction = "manipulation";
 
     let input = $("#coverEditorInput");
     if (!input) {
@@ -201,41 +224,53 @@
       .nativeFileTextV30{position:relative;z-index:2;pointer-events:none;display:block;width:100%;text-align:center}
       #coverNativeV30 .nativeFileTextV30{text-align:left}
       .nativeFileInputV30::-webkit-file-upload-button{
-        width:100%;height:100%;margin:0;border:0;padding:0;background:transparent;color:transparent;font-size:0;
+        width:100%!important;height:100%!important;min-width:100%!important;min-height:100%!important;
+        margin:0!important;border:0!important;padding:0!important;background:transparent!important;
+        color:transparent!important;font-size:100px!important;
       }
       .nativeFileInputV30::file-selector-button{
-        width:100%;height:100%;margin:0;border:0;padding:0;background:transparent;color:transparent;font-size:0;
+        width:100%!important;height:100%!important;min-width:100%!important;min-height:100%!important;
+        margin:0!important;border:0!important;padding:0!important;background:transparent!important;
+        color:transparent!important;font-size:100px!important;
       }
     `;
     document.head.appendChild(style);
   }
 
-  // Capture the selected book before the legacy menu code runs.
+  // Capture the selected book before the menu opens. Never cancel the native file gesture.
   window.addEventListener("pointerdown", (event) => {
     const dots = event.target.closest?.(".bookMenuBtn");
-    if (dots) {
-      currentBookId = String(dots.closest(".bookRow")?.dataset.bookId || "");
-      const input = $("#coverEditorInput");
-      if (input) input.dataset.bookId = currentBookId;
-    }
+    if (!dots) return;
+    currentBookId = String(dots.closest(".bookRow")?.dataset.bookId || "");
+    const input = $("#coverEditorInput");
+    if (input) input.dataset.bookId = currentBookId;
   }, true);
+
+  function ensureNativeControls() {
+    addStyle();
+    installLibraryImport();
+    installCoverAction();
+  }
 
   function init() {
     $("#coverSheetV26")?.remove();
     $("#coverSourceSheetV24")?.remove();
     $("#coverEditorModalV23")?.remove();
-    addStyle();
-    installLibraryImport();
-    installCoverAction();
-    setTimeout(() => { installLibraryImport(); installCoverAction(); }, 0);
-    setTimeout(() => { installLibraryImport(); installCoverAction(); }, 250);
-    setTimeout(() => { installLibraryImport(); installCoverAction(); }, 800);
+    ensureNativeControls();
+    // One post-layout pass is enough; avoid a permanent MutationObserver on iPhone.
+    requestAnimationFrame(ensureNativeControls);
   }
 
-  document.addEventListener("DOMContentLoaded", init);
-  const observer = new MutationObserver(() => {
-    installLibraryImport();
-    installCoverAction();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init, { once: true });
+  } else {
+    init();
+  }
+
+  // Home-screen PWAs can be frozen/resumed without a reload. Re-assert the
+  // native controls only when the page actually becomes active again.
+  window.addEventListener("pageshow", ensureNativeControls);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) ensureNativeControls();
   });
-  if (document.documentElement) observer.observe(document.documentElement, { childList: true, subtree: true });
 })();
