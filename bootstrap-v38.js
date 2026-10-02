@@ -1,9 +1,8 @@
-// Narrador v38: rebuild the Library importer around the exact Home picker.
-// One real PDF input (#pdfInput) is physically moved into whichever tab is active.
-// This avoids duplicate iOS file inputs, hidden-view label targets, scripted .click(), and stale SW query races.
+// Narrador v39: first-tap Library importer on iPhone.
+// The exact working #pdfInput from Home is moved into a Library + host BEFORE the user taps.
+// In Library the user taps the native file input itself — no label forwarding, no scripted click,
+// and no DOM movement during the tap gesture.
 (() => {
-  // Normalize every legacy service-worker registration to one stable URL.
-  // Mark the old v34 patch as already handled so library-v33.js cannot rewrite it back.
   if ("serviceWorker" in navigator) {
     try {
       const originalRegister = navigator.serviceWorker.register.bind(navigator.serviceWorker);
@@ -16,36 +15,86 @@
       };
       try { navigator.serviceWorker.__narradorV34Patched = true; } catch (_) {}
     } catch (error) {
-      console.warn("Narrador v38: no se pudo normalizar el service worker", error);
+      console.warn("Narrador v39: no se pudo normalizar el service worker", error);
     }
   }
 
   const $ = (s) => document.querySelector(s);
   let observer = null;
 
-  function makeLibraryPlus() {
-    const libraryHeader = $("#libraryView .mainHeader");
-    if (!libraryHeader) return null;
+  function addStyle() {
+    if ($("#libraryImportStyleV39")) return;
+    const style = document.createElement("style");
+    style.id = "libraryImportStyleV39";
+    style.textContent = `
+      #libraryPlusV39{
+        position:relative!important;
+        overflow:hidden!important;
+        -webkit-user-select:none!important;
+        user-select:none!important;
+        -webkit-touch-callout:none!important;
+        touch-action:manipulation!important;
+      }
+      #libraryPlusV39 .libraryPlusGlyphV39{
+        pointer-events:none!important;
+        position:absolute!important;
+        inset:0!important;
+        z-index:1!important;
+        display:grid!important;
+        place-items:center!important;
+      }
+      #libraryPlusV39 > #pdfInput{
+        display:block!important;
+        position:absolute!important;
+        inset:0!important;
+        width:100%!important;
+        height:100%!important;
+        min-width:100%!important;
+        min-height:100%!important;
+        margin:0!important;
+        padding:0!important;
+        border:0!important;
+        opacity:.001!important;
+        z-index:20!important;
+        pointer-events:auto!important;
+        cursor:pointer!important;
+        -webkit-appearance:none!important;
+        appearance:none!important;
+        -webkit-user-select:none!important;
+        user-select:none!important;
+        -webkit-touch-callout:none!important;
+        touch-action:manipulation!important;
+      }
+      #libraryPlusV39 > #pdfInput::-webkit-file-upload-button,
+      #libraryPlusV39 > #pdfInput::file-selector-button{
+        width:100%!important;
+        height:100%!important;
+        margin:0!important;
+        padding:0!important;
+        border:0!important;
+        opacity:0!important;
+      }
+    `;
+    document.head.appendChild(style);
+  }
 
-    let plus = $("#libraryPlusV38");
-    if (!plus) {
-      plus = document.createElement("label");
-      plus.id = "libraryPlusV38";
-      plus.className = "homePlus";
-      plus.htmlFor = "pdfInput";
-      plus.setAttribute("for", "pdfInput");
-      plus.setAttribute("aria-label", "Importar PDF");
-      plus.textContent = "＋";
-      plus.style.webkitUserSelect = "none";
-      plus.style.userSelect = "none";
-      plus.style.webkitTouchCallout = "none";
-      plus.style.touchAction = "manipulation";
+  function makeLibraryHost() {
+    const header = $("#libraryView .mainHeader");
+    if (!header) return null;
 
-      const old = $("#libraryAddV37") || $("#libraryImportNative") || $("#libraryView .libraryPlus");
-      if (old) old.replaceWith(plus);
-      else libraryHeader.appendChild(plus);
+    let host = $("#libraryPlusV39");
+    if (!host) {
+      host = document.createElement("div");
+      host.id = "libraryPlusV39";
+      host.className = "homePlus";
+      host.setAttribute("aria-label", "Importar PDF");
+      host.innerHTML = '<span class="libraryPlusGlyphV39" aria-hidden="true">＋</span>';
+
+      const old = $("#libraryPlusV38") || $("#libraryAddV37") || $("#libraryImportNative") || $("#libraryView .libraryPlus");
+      if (old) old.replaceWith(host);
+      else header.appendChild(host);
     }
-    return plus;
+    return host;
   }
 
   function disableLegacyLibraryPicker() {
@@ -57,29 +106,32 @@
     oldInput.style.pointerEvents = "none";
   }
 
-  function syncRealPickerLocation() {
+  function syncPicker() {
     const input = $("#pdfInput");
     const homePlus = $("#homeView .homePlus");
-    const libraryPlus = $("#libraryPlusV38");
-    if (!input || !homePlus || !libraryPlus) return;
+    const libraryHost = $("#libraryPlusV39");
+    if (!input || !homePlus || !libraryHost) return;
 
+    input.accept = "application/pdf,.pdf";
     const libraryActive = $("#libraryView")?.classList.contains("active") || document.body.dataset.mainTab === "library";
-    const target = libraryActive ? libraryPlus : homePlus;
 
-    // Keep the exact same working input immediately beside the active label.
-    if (input.previousElementSibling !== target) target.insertAdjacentElement("afterend", input);
+    if (libraryActive) {
+      // Important: the native input is already inside the + before any tap occurs.
+      if (input.parentElement !== libraryHost) libraryHost.appendChild(input);
+    } else {
+      // Restore the original Home arrangement so its proven label remains unchanged.
+      if (input.previousElementSibling !== homePlus) homePlus.insertAdjacentElement("afterend", input);
+    }
   }
 
-  function rebuild() {
-    const input = $("#pdfInput");
-    if (!input) return;
-    input.accept = "application/pdf,.pdf";
-    makeLibraryPlus();
+  function init() {
+    addStyle();
+    makeLibraryHost();
     disableLegacyLibraryPicker();
-    syncRealPickerLocation();
+    syncPicker();
 
     if (!observer) {
-      observer = new MutationObserver(syncRealPickerLocation);
+      observer = new MutationObserver(() => syncPicker());
       const home = $("#homeView");
       const library = $("#libraryView");
       if (home) observer.observe(home, { attributes: true, attributeFilter: ["class"] });
@@ -88,14 +140,12 @@
     }
   }
 
-  // Run before the user can tap, and again on PWA resume.
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", rebuild, { once: true });
-  else rebuild();
-  window.addEventListener("pageshow", rebuild);
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once: true });
+  else init();
 
-  // Extra iOS safeguard: just before native label activation, ensure #pdfInput
-  // is physically in the active Library header. We do not preventDefault.
-  document.addEventListener("pointerdown", (event) => {
-    if (event.target.closest?.("#libraryPlusV38")) syncRealPickerLocation();
-  }, true);
+  window.addEventListener("pageshow", () => {
+    makeLibraryHost();
+    disableLegacyLibraryPicker();
+    syncPicker();
+  });
 })();
