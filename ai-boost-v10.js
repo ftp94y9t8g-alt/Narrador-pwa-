@@ -1,4 +1,4 @@
-import { KokoroTTS } from "./kokoro-ios.js?v=12";
+import { KokoroTTS } from "./kokoro-ios.js?v=13";
 
 const MODEL_ID = "onnx-community/Kokoro-82M-v1.0-ONNX";
 const PREF_KEY = "narrador-voice-prefs-v10";
@@ -14,7 +14,7 @@ function setNote(message, error = false) {
   if (!note) return;
   const strong = note.querySelector("strong");
   const span = note.querySelector("span");
-  if (strong) strong.textContent = error ? "IA local · problema de voz" : "IA local beta · v12";
+  if (strong) strong.textContent = error ? "Narración con IA · requiere atención" : "Narración con IA";
   if (span) span.textContent = message;
 }
 
@@ -111,10 +111,6 @@ function restorePrefs() {
     const voice = $("#voiceSelect");
     if (voice && [...voice.options].some(o => o.value === prefs.voice)) voice.value = prefs.voice;
     restoring = false;
-
-    // Important on iPhone: do not load the neural model just because the app
-    // restored the user's previous AI choice. Only prepare the lightweight
-    // pronunciation layer. The heavy model starts after an explicit interaction.
     if (prefs.engine === "kokoro") preparePronunciationOnly();
   });
 }
@@ -172,8 +168,6 @@ document.addEventListener("change", (event) => {
   if (event.target?.matches?.("#engineSelect, #languageSelect, #voiceSelect, #styleSelect")) savePrefs();
 
   if (!restoring && event.target?.matches?.("#engineSelect") && event.target.value === "kokoro") {
-    // Lightweight preloading only. The heavy model no longer starts automatically
-    // when Narrador launches, preventing Safari tab crashes.
     preparePronunciationOnly();
   }
 }, true);
@@ -190,9 +184,6 @@ document.addEventListener("click", (event) => {
   playFastPreview(button);
 }, { capture: true });
 
-// When the user explicitly opens a book while AI is selected, begin the heavy
-// model load shortly afterward. This hides part of the wait without doing it on
-// app startup or during a service-worker reload.
 document.addEventListener("click", (event) => {
   const openedBook = event.target?.closest?.(".bookRow, .continueInner");
   if (!openedBook || $("#engineSelect")?.value !== "kokoro") return;
