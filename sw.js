@@ -1,14 +1,14 @@
-const CACHE = "narrador-v13";
+const CACHE = "narrador-v14";
 const CORE = [
   "./",
   "./index.html",
-  "./styles.css?v=13",
-  "./app.js?v=13",
-  "./detector-v4.js?v=13",
-  "./kokoro-ios.js?v=13",
-  "./ios-audio-v9.js?v=13",
-  "./ai-boost-v10.js?v=13",
-  "./continuous-ai-v12.js?v=13",
+  "./styles.css?v=14",
+  "./app.js?v=14",
+  "./detector-v4.js?v=14",
+  "./kokoro-ios.js?v=14",
+  "./ios-audio-v9.js?v=14",
+  "./ai-boost-v10.js?v=14",
+  "./continuous-ai-v12.js?v=14",
   "./manifest.webmanifest",
   "./icon.svg"
 ];
