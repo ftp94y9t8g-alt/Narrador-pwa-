@@ -1,7 +1,8 @@
-const CACHE = "narrador-v37";
+const CACHE = "narrador-v38";
 const CORE = [
   "./",
   "./index.html",
+  "./bootstrap-v38.js?v=38",
   "./styles.css?v=16",
   "./interface-v15.css?v=16",
   "./interface-v16.css?v=16",
@@ -21,6 +22,23 @@ const CORE = [
   "./icon.svg"
 ];
 
+function injectBootstrap(html) {
+  if (html.includes("bootstrap-v38.js")) return html;
+  return html.replace("</head>", '  <script src="./bootstrap-v38.js?v=38"></script>\n</head>');
+}
+
+async function enhancedHtmlResponse(response) {
+  const html = injectBootstrap(await response.text());
+  const headers = new Headers(response.headers);
+  headers.delete("content-length");
+  headers.delete("content-encoding");
+  return new Response(html, {
+    status: response.status,
+    statusText: response.statusText,
+    headers
+  });
+}
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE)
@@ -30,11 +48,17 @@ self.addEventListener("install", (event) => {
 });
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches.keys()
-      .then((keys) => Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key))))
-      .then(() => self.clients.claim())
-  );
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key)));
+    await self.clients.claim();
+
+    // Force already-open installed PWAs onto the repaired HTML once v38 takes control.
+    const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+    await Promise.all(windows.map(async (client) => {
+      try { await client.navigate(client.url); } catch (_) {}
+    }));
+  })());
 });
 
 self.addEventListener("fetch", (event) => {
@@ -45,15 +69,19 @@ self.addEventListener("fetch", (event) => {
   const isNavigation = event.request.mode === "navigate" || /(?:index\.html|\/$)/.test(url.pathname);
 
   if (isNavigation) {
-    event.respondWith(
-      fetch(event.request, { cache: "no-store" })
-        .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE).then((cache) => cache.put("./index.html", copy)).catch(() => {});
-          return response;
-        })
-        .catch(() => caches.match("./index.html").then((cached) => cached || caches.match("./")))
-    );
+    event.respondWith((async () => {
+      try {
+        const network = await fetch(event.request, { cache: "no-store" });
+        const enhanced = await enhancedHtmlResponse(network);
+        const cache = await caches.open(CACHE);
+        await cache.put("./index.html", enhanced.clone());
+        return enhanced;
+      } catch (_) {
+        const cached = await caches.match("./index.html") || await caches.match("./");
+        if (!cached) throw _;
+        return enhancedHtmlResponse(cached);
+      }
+    })());
     return;
   }
 
