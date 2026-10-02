@@ -1,12 +1,11 @@
-const CACHE = "narrador-v44";
+const CACHE = "narrador-v45";
 const CORE = [
   "./",
   "./index.html",
-  "./bootstrap-v40.js?v=44",
-  "./pdf-cover-v40.js?v=44",
-  "./home-player-v42.js?v=44",
-  "./home-fix-v44.js?v=44",
-  "./library-firsttap-v43.js?v=44",
+  "./bootstrap-v40.js?v=45",
+  "./pdf-cover-v40.js?v=45",
+  "./home-player-v42.js?v=45",
+  "./library-firsttap-v43.js?v=45",
   "./styles.css?v=16",
   "./interface-v15.css?v=16",
   "./interface-v16.css?v=16",
@@ -37,7 +36,7 @@ function enhanceHtml(html) {
 
   return cleaned.replace(
     "</head>",
-    '  <script src="./bootstrap-v40.js?v=44"></script>\n  <script type="module" src="./pdf-cover-v40.js?v=44"></script>\n  <script src="./home-player-v42.js?v=44"></script>\n  <script src="./home-fix-v44.js?v=44"></script>\n  <script src="./library-firsttap-v43.js?v=44"></script>\n</head>'
+    '  <script src="./bootstrap-v40.js?v=45"></script>\n  <script type="module" src="./pdf-cover-v40.js?v=45"></script>\n  <script src="./home-player-v42.js?v=45"></script>\n  <script src="./library-firsttap-v43.js?v=45"></script>\n</head>'
   );
 }
 
