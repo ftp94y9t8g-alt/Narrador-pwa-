@@ -244,21 +244,14 @@
   <script src="./interaction-v19.js?v=31"></script>
   <script src="./cover-native-v31.js?v=31"></script>
   <script>
-    window.addEventListener("load", async () => {
-      if (!("serviceWorker" in navigator)) return;
-      try {
-        const reg = await navigator.serviceWorker.register("./sw.js?v=31", { updateViaCache: "none" });
-        await reg.update();
-        navigator.serviceWorker.addEventListener("controllerchange", () => {
-          const key = "narrador-v31-reloaded";
-          if (sessionStorage.getItem(key)) return;
-          sessionStorage.setItem(key,"1");
-          location.reload();
-        });
-      } catch (error) {
-        console.warn("Narrador: no se pudo actualizar el PWA", error);
-      }
-    });
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        const key = "narrador-v31-reloaded";
+        if (sessionStorage.getItem(key)) return;
+        sessionStorage.setItem(key, "1");
+        location.reload();
+      });
+    }
   </script>
 </body>
 </html>
