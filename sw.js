@@ -1,4 +1,4 @@
-const CACHE = "narrador-v19";
+const CACHE = "narrador-v20";
 const CORE = [
   "./",
   "./index.html",
@@ -7,9 +7,9 @@ const CORE = [
   "./interface-v16.css?v=16",
   "./interface-v17.css?v=17",
   "./interface-v18.css?v=18",
-  "./interface-v19.css?v=19",
+  "./interface-v19.css?v=20",
   "./interface-v16.js?v=16",
-  "./interaction-v19.js?v=19",
+  "./interaction-v19.js?v=20",
   "./app.js?v=16",
   "./detector-v4.js?v=16",
   "./kokoro-ios.js?v=16",
@@ -39,12 +39,10 @@ function enhanceHtml(html) {
   if (!html.includes("interface-v18.css")) {
     html = html.replace("</head>", '  <link rel="stylesheet" href="./interface-v18.css?v=18" />\n</head>');
   }
-  if (!html.includes("interface-v19.css")) {
-    html = html.replace("</head>", '  <link rel="stylesheet" href="./interface-v19.css?v=19" />\n</head>');
-  }
-  if (!html.includes("interaction-v19.js")) {
-    html = html.replace("</body>", '  <script src="./interaction-v19.js?v=19"></script>\n</body>');
-  }
+  html = html.replace(/<link rel="stylesheet" href="\.\/interface-v19\.css\?v=\d+" \/>\s*/g, "");
+  html = html.replace(/<script src="\.\/interaction-v19\.js\?v=\d+"><\/script>\s*/g, "");
+  html = html.replace("</head>", '  <link rel="stylesheet" href="./interface-v19.css?v=20" />\n</head>');
+  html = html.replace("</body>", '  <script src="./interaction-v19.js?v=20"></script>\n</body>');
   return html;
 }
 
