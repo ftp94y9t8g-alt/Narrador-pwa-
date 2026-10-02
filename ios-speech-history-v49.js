@@ -135,6 +135,7 @@
     let chosen = null;
     if (p.voice && String(p.voice).includes("|")) chosen = list.find(v => `${v.name}|${v.lang}` === p.voice);
     if (!chosen && p.voice && !Number.isNaN(Number(p.voice))) chosen = list[Number(p.voice)] || null;
+    if (!chosen && p.voice) chosen = list.find(v => v.name === p.voice || `${v.name} · ${v.lang}` === p.voice);
     if (!chosen) chosen = list.find(v => v.lang?.toLowerCase().startsWith(lang) && /premium|enhanced|natural|siri|m[oó]nica/i.test(v.name || ""));
     if (!chosen) chosen = list.find(v => v.lang?.toLowerCase().startsWith(lang));
     return chosen || null;
@@ -248,13 +249,13 @@
         updatePlayUI();
         toast("La voz del iPhone no respondió. Cambia de voz y vuelve a intentar.", 4300);
       }
-    }, retry ? 1300 : 900);
+    }, retry ? 1400 : 850);
   }
 
   function retrySystem(token) {
     if (token !== speech.token || !speech.playing) return;
     try { speechSynthesis.cancel(); speechSynthesis.resume(); } catch (_) {}
-    setTimeout(() => speakBlock(token, true, 1), 40);
+    setTimeout(() => speakBlock(token, true, 1), 110);
   }
 
   function prepareSpeech(book) {
@@ -267,23 +268,15 @@
   }
 
   function startSpeechFromGesture(book) {
-    if (!book || !prepareSpeech(book)) return toast("No encontré texto para narrar.");
     if (speech.playing) return stopSpeech();
+    if (!book || !prepareSpeech(book)) return toast("No encontré texto para narrar.");
 
     speech.playing = true;
     const token = ++speech.token;
     speech.book.lastPlayedAt = Date.now();
     putBook(speech.book);
     updatePlayUI();
-
-    // Safari/iOS standalone can silently suppress the first speech request.
-    // Prime the Web Speech session inside the same tap, then queue the real utterance.
-    try {
-      speechSynthesis.resume();
-      const primer = new SpeechSynthesisUtterance("");
-      primer.volume = 0;
-      speechSynthesis.speak(primer);
-    } catch (_) {}
+    try { speechSynthesis.resume(); } catch (_) {}
     speakBlock(token, false, 0);
   }
 
@@ -357,15 +350,18 @@
     const style = document.createElement("style");
     style.id = "historySpeechV49Style";
     style.textContent = `
-      html,body{overflow-x:hidden!important}
-      #historyView,#historyList{width:100%!important;max-width:100%!important;overflow-x:hidden!important;overscroll-behavior-x:none}
-      #historyList{display:grid!important;gap:10px!important}
-      #historyList .historyRow{width:100%!important;max-width:100%!important;min-width:0!important;display:grid!important;grid-template-columns:50px minmax(0,1fr) 38px!important;align-items:center!important;gap:10px!important;overflow:hidden!important;padding:10px!important}
-      #historyList .historyCover{width:50px!important;height:66px!important;min-width:50px!important;border-radius:10px!important;background-size:contain!important;background-repeat:no-repeat!important;background-color:#fff!important}
-      #historyList .historyMeta{min-width:0!important;overflow:hidden!important;text-align:left!important}
+      html,body{overflow-x:hidden!important;max-width:100vw!important}
+      .shell{overflow-x:hidden!important}
+      #historyView{width:100%!important;max-width:760px!important;min-width:0!important;margin:0 auto!important;overflow-x:hidden!important;overscroll-behavior-x:none!important;touch-action:pan-y!important}
+      #historyView .mainHeader,#historyView .historyHead,#historyView>p,#historyList{width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important}
+      #historyList{display:grid!important;grid-template-columns:minmax(0,1fr)!important;justify-items:stretch!important;gap:10px!important;padding:0!important;overflow:hidden!important}
+      #historyList .historyRow{width:100%!important;max-width:100%!important;min-width:0!important;display:grid!important;grid-template-columns:50px minmax(0,1fr) 38px!important;align-items:center!important;gap:10px!important;overflow:hidden!important;padding:10px!important;margin:0!important;transform:none!important;box-sizing:border-box!important}
+      #historyList .historyCover{width:50px!important;height:66px!important;min-width:50px!important;border-radius:10px!important;background-size:contain!important;background-position:center!important;background-repeat:no-repeat!important;background-color:#fff!important}
+      #historyList .historyMeta{min-width:0!important;max-width:100%!important;overflow:hidden!important;text-align:left!important}
       #historyList .historyMeta h4,#historyList .historyMeta p,#historyList .historyAuthor{display:block!important;max-width:100%!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
       #historyList .historyMeta h4{margin:0 0 3px!important}
       #historyList .historyMeta p{margin:2px 0 5px!important}
+      #historyList .historyProgress{width:100%!important;max-width:100%!important;overflow:hidden!important}
       #historyList .historyPlay{width:34px!important;height:34px!important;border-radius:50%!important;display:grid!important;place-items:center!important;flex:none!important;background:#eef3ff!important;color:#2f6df6!important;font-weight:900!important;line-height:1!important}
     `;
     document.head.appendChild(style);
@@ -373,7 +369,6 @@
 
   function install() {
     installStyle();
-    try { speechSynthesis.cancel(); } catch (_) {}
     readBooks().then(() => patchHistory());
     normalizeVoiceSelect();
 
@@ -385,7 +380,7 @@
     window.addEventListener("pointerdown", (event) => {
       const play = event.target?.closest?.("#homeFeatured [data-home45-action='play']");
       if (play && prefs().engine === "system") {
-        // Stop the older pointerdown player; v49 will start speech from the click gesture.
+        try { speechSynthesis.cancel(); speechSynthesis.resume(); } catch (_) {}
         event.stopImmediatePropagation();
         return;
       }
@@ -415,8 +410,12 @@
         const row = historyPlay.closest(".historyRow");
         const book = booksCache.find(b => String(b.id) === String(row?.dataset.bookId));
         if (!book) return;
-        if (prefs().engine === "system") startSpeechFromGesture(book);
-        else toast("La reproducción IA se inicia desde Inicio.");
+        if (prefs().engine === "system") {
+          try { speechSynthesis.cancel(); speechSynthesis.resume(); } catch (_) {}
+          startSpeechFromGesture(book);
+        } else {
+          toast("La reproducción IA se inicia desde Inicio.");
+        }
       }
     }, true);
 
