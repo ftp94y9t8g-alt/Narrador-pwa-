@@ -1,16 +1,17 @@
-const CACHE = "narrador-v15";
+const CACHE = "narrador-v16";
 const CORE = [
   "./",
   "./index.html",
-  "./styles.css?v=15",
-  "./interface-v15.css?v=15",
-  "./interface-v15.js?v=15",
-  "./app.js?v=15",
-  "./detector-v4.js?v=15",
-  "./kokoro-ios.js?v=15",
-  "./ios-audio-v9.js?v=15",
-  "./ai-boost-v10.js?v=15",
-  "./continuous-ai-v12.js?v=15",
+  "./styles.css?v=16",
+  "./interface-v15.css?v=16",
+  "./interface-v16.css?v=16",
+  "./interface-v16.js?v=16",
+  "./app.js?v=16",
+  "./detector-v4.js?v=16",
+  "./kokoro-ios.js?v=16",
+  "./ios-audio-v9.js?v=16",
+  "./ai-boost-v10.js?v=16",
+  "./continuous-ai-v12.js?v=16",
   "./manifest.webmanifest",
   "./icon.svg"
 ];
@@ -31,7 +32,7 @@ self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   const url = new URL(event.request.url);
 
-  if (url.origin === self.location.origin && /(?:index\.html|app\.js|styles\.css|interface-v15\.css|interface-v15\.js|detector-v4\.js|kokoro-ios\.js|ios-audio-v9\.js|ai-boost-v10\.js|continuous-ai-v12\.js|\/$)/.test(url.pathname)) {
+  if (url.origin === self.location.origin && /(?:index\.html|app\.js|styles\.css|interface-v15\.css|interface-v16\.css|interface-v16\.js|detector-v4\.js|kokoro-ios\.js|ios-audio-v9\.js|ai-boost-v10\.js|continuous-ai-v12\.js|\/$)/.test(url.pathname)) {
     event.respondWith(
       fetch(event.request, { cache: "no-store" })
         .then((response) => {
