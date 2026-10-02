@@ -1,4 +1,4 @@
-import { KokoroTTS } from "./kokoro-ios.js?v=11";
+import { KokoroTTS } from "./kokoro-ios.js?v=12";
 
 const MODEL_ID = "onnx-community/Kokoro-82M-v1.0-ONNX";
 const PREF_KEY = "narrador-voice-prefs-v10";
@@ -14,7 +14,7 @@ function setNote(message, error = false) {
   if (!note) return;
   const strong = note.querySelector("strong");
   const span = note.querySelector("span");
-  if (strong) strong.textContent = error ? "IA local · problema de voz" : "IA local beta · v11";
+  if (strong) strong.textContent = error ? "IA local · problema de voz" : "IA local beta · v12";
   if (span) span.textContent = message;
 }
 
@@ -50,7 +50,7 @@ async function warmAI() {
     });
     try { await tts.prepareLanguage?.(languageFromUI()); } catch (_) {}
     window.__narradorWarmTTS = tts;
-    setNote("IA preparada · modo estable para iPhone.");
+    setNote("IA preparada · narración continua lista para iPhone.");
     return tts;
   })().catch(error => {
     warmPromise = null;
