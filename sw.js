@@ -1,9 +1,9 @@
-const CACHE = "narrador-v40";
+const CACHE = "narrador-v41";
 const CORE = [
   "./",
   "./index.html",
-  "./bootstrap-v40.js?v=40",
-  "./pdf-cover-v40.js?v=40",
+  "./bootstrap-v40.js?v=41",
+  "./pdf-cover-v40.js?v=41",
   "./styles.css?v=16",
   "./interface-v15.css?v=16",
   "./interface-v16.css?v=16",
@@ -24,14 +24,14 @@ const CORE = [
 ];
 
 function enhanceHtml(html) {
-  let cleaned = html
+  const cleaned = html
     .replace(/\s*<script[^>]*src=["']\.\/bootstrap-v38\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/bootstrap-v40\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/pdf-cover-v40\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n");
 
   return cleaned.replace(
     "</head>",
-    '  <script src="./bootstrap-v40.js?v=40"></script>\n  <script type="module" src="./pdf-cover-v40.js?v=40"></script>\n</head>'
+    '  <script src="./bootstrap-v40.js?v=41"></script>\n  <script type="module" src="./pdf-cover-v40.js?v=41"></script>\n</head>'
   );
 }
 
@@ -61,7 +61,7 @@ self.addEventListener("activate", (event) => {
     await Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key)));
     await self.clients.claim();
 
-    // Push already-open installed PWAs onto the repaired v40 HTML.
+    // Push already-open installed PWAs onto the repaired v41 HTML.
     const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
     await Promise.all(windows.map(async (client) => {
       try { await client.navigate(client.url); } catch (_) {}
