@@ -10,11 +10,16 @@
   <title>Narrador</title>
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="./styles.css?v=13" />
+  <link rel="stylesheet" href="./styles.css?v=14" />
+  <style>
+    .topbar{justify-content:flex-start}
+    .bottomNav{grid-template-columns:1fr 1fr}
+    @media(max-width:560px){.bottomNav{grid-template-columns:1fr 1fr}}
+  </style>
   <script type="importmap">
   {
     "imports": {
-      "https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/dist/kokoro.web.js": "./kokoro-ios.js?v=13"
+      "https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/dist/kokoro.web.js": "./kokoro-ios.js?v=14"
     }
   }
   </script>
@@ -29,11 +34,7 @@
           <div class="brandSub">Audiolibros inteligentes</div>
         </div>
       </div>
-      <label class="importBtn" aria-label="Importar PDF">
-        <input id="pdfInput" type="file" accept="application/pdf,.pdf" />
-        <span class="plus">＋</span>
-        <span class="importText">Importar</span>
-      </label>
+      <input id="pdfInput" type="file" accept="application/pdf,.pdf" />
     </header>
 
     <section id="libraryView" class="view active">
@@ -185,25 +186,38 @@
   </main>
 
   <nav class="bottomNav" aria-label="Navegación principal">
-    <button class="navItem active" type="button" data-go="library"><span class="navIcon">⌂</span><span class="navLabel">Inicio</span></button>
-    <button class="navItem" type="button" data-go="library"><span class="navIcon">▤</span><span class="navLabel">Biblioteca</span></button>
-    <label class="navItem navImport" for="pdfInput2"><span class="navIcon">＋</span><span class="navLabel">Importar</span></label>
+    <button class="navItem active" type="button" data-go="library" data-section="home"><span class="navIcon">⌂</span><span class="navLabel">Inicio</span></button>
+    <button class="navItem" type="button" data-go="library" data-section="library"><span class="navIcon">▤</span><span class="navLabel">Biblioteca</span></button>
   </nav>
 
   <div id="toast" class="toast"></div>
-  <script src="./ios-audio-v9.js?v=13"></script>
-  <script type="module" src="./ai-boost-v10.js?v=13"></script>
-  <script type="module" src="./detector-v4.js?v=13"></script>
-  <script type="module" src="./app.js?v=13"></script>
-  <script src="./continuous-ai-v12.js?v=13"></script>
+  <script src="./ios-audio-v9.js?v=14"></script>
+  <script type="module" src="./ai-boost-v10.js?v=14"></script>
+  <script type="module" src="./detector-v4.js?v=14"></script>
+  <script type="module" src="./app.js?v=14"></script>
+  <script src="./continuous-ai-v12.js?v=14"></script>
   <script>
+    document.addEventListener("click", (event) => {
+      const item = event.target.closest?.(".bottomNav .navItem[data-section]");
+      if (!item) return;
+      document.querySelectorAll(".bottomNav .navItem").forEach((el) => el.classList.toggle("active", el === item));
+      const target = item.dataset.section;
+      setTimeout(() => {
+        if (target === "library") {
+          document.querySelector("#libraryContent")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+      }, 80);
+    });
+
     window.addEventListener("load", async () => {
       if (!("serviceWorker" in navigator)) return;
       try {
-        const reg = await navigator.serviceWorker.register("./sw.js?v=13", { updateViaCache: "none" });
+        const reg = await navigator.serviceWorker.register("./sw.js?v=14", { updateViaCache: "none" });
         await reg.update();
         navigator.serviceWorker.addEventListener("controllerchange", () => {
-          const key = "narrador-v13-reloaded";
+          const key = "narrador-v14-reloaded";
           if (sessionStorage.getItem(key)) return;
           sessionStorage.setItem(key, "1");
           location.reload();
