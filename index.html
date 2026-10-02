@@ -16,6 +16,33 @@
   <link rel="stylesheet" href="./interface-v17.css?v=17" />
   <link rel="stylesheet" href="./interface-v18.css?v=18" />
   <link rel="stylesheet" href="./interface-v19.css?v=31" />
+  <style>
+    /* v36: the Library + is now covered by the real native file input.
+       iOS taps the input itself; there is no label forwarding or scripted click. */
+    #libraryImportNative{
+      position:relative;
+      overflow:hidden;
+      -webkit-user-select:none;
+      user-select:none;
+      -webkit-touch-callout:none;
+      touch-action:manipulation;
+    }
+    #libraryImportNative > span{pointer-events:none}
+    #libraryImportNative > #pdfInput2{
+      display:block!important;
+      position:absolute!important;
+      inset:0!important;
+      width:100%!important;
+      height:100%!important;
+      margin:0!important;
+      padding:0!important;
+      opacity:.001!important;
+      z-index:20!important;
+      cursor:pointer!important;
+      -webkit-appearance:none;
+      appearance:none;
+    }
+  </style>
   <script type="importmap">
   {
     "imports": {
@@ -54,8 +81,10 @@
     <section id="libraryView" class="view">
       <header class="mainHeader">
         <div class="mainBrand"><div class="mainBrandMark">N</div><div><div class="mainBrandName">Narrador</div><div class="mainBrandSub">Mi colección</div></div></div>
-        <label class="homePlus" for="pdfInput2" aria-label="Importar PDF" style="-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation">＋</label>
-        <input id="pdfInput2" type="file" accept="application/pdf,.pdf" />
+        <div id="libraryImportNative" class="homePlus" aria-label="Importar PDF">
+          <span aria-hidden="true">＋</span>
+          <input id="pdfInput2" type="file" accept="application/pdf,.pdf" aria-label="Importar PDF" />
+        </div>
       </header>
 
       <div class="libraryTop">
@@ -119,7 +148,7 @@
       <div class="settingsStack">
         <button id="notificationsRow" class="settingRow" type="button"><div class="settingIcon">♢</div><div class="settingText"><strong>Notificaciones</strong><span id="notificationState">Toca para permitir avisos</span></div><div class="settingAction">›</div></button>
         <div class="settingRow"><div class="settingIcon">▣</div><div class="settingText"><strong>Almacenamiento offline</strong><span id="storageLabel">Calculando espacio…</span><div class="storageBar"><i id="storageBarFill"></i></div></div></div>
-        <div class="settingRow"><div class="settingIcon">ⓘ</div><div class="settingText"><strong>Acerca de Narrador</strong><span>Convierte PDFs en experiencias de audio y lectura</span></div></div>
+        <div class="settingRow"><div class="settingIcon">ⓘ</div><div class="settingText"><strong>Acerca de Narrador</strong><span>Convierte PDFs en experiencias de audio y lectura</span></div></div></div>
       </div>
       <div class="settingsNote">Cuando añadamos la generación completa de audiolibros, esta sección también controlará descargas offline, calidad de audio y el aviso “Tu audiolibro está listo”.</div>
     </section>
@@ -245,11 +274,19 @@
   <script src="./continuous-ai-v12.js?v=16"></script>
   <script src="./interface-v16.js?v=16"></script>
   <script src="./interaction-v19.js?v=31"></script>
-  <script src="./library-v33.js?v=35"></script>
+  <script src="./library-v33.js?v=36"></script>
   <script>
     if ("serviceWorker" in navigator) {
+      window.addEventListener("load", async () => {
+        try {
+          const reg = await navigator.serviceWorker.register("./sw.js?v=36", { updateViaCache: "none" });
+          await reg.update();
+        } catch (error) {
+          console.warn("Narrador: no se pudo actualizar el PWA", error);
+        }
+      });
       navigator.serviceWorker.addEventListener("controllerchange", () => {
-        const key = "narrador-v35-reloaded";
+        const key = "narrador-v36-reloaded";
         if (sessionStorage.getItem(key)) return;
         sessionStorage.setItem(key, "1");
         location.reload();
