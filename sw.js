@@ -1,8 +1,9 @@
-const CACHE = "narrador-v39";
+const CACHE = "narrador-v40";
 const CORE = [
   "./",
   "./index.html",
-  "./bootstrap-v38.js?v=39",
+  "./bootstrap-v40.js?v=40",
+  "./pdf-cover-v40.js?v=40",
   "./styles.css?v=16",
   "./interface-v15.css?v=16",
   "./interface-v16.css?v=16",
@@ -22,13 +23,20 @@ const CORE = [
   "./icon.svg"
 ];
 
-function injectBootstrap(html) {
-  const cleaned = html.replace(/\s*<script[^>]*src=["']\.\/bootstrap-v38\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n");
-  return cleaned.replace("</head>", '  <script src="./bootstrap-v38.js?v=39"></script>\n</head>');
+function enhanceHtml(html) {
+  let cleaned = html
+    .replace(/\s*<script[^>]*src=["']\.\/bootstrap-v38\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
+    .replace(/\s*<script[^>]*src=["']\.\/bootstrap-v40\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
+    .replace(/\s*<script[^>]*src=["']\.\/pdf-cover-v40\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n");
+
+  return cleaned.replace(
+    "</head>",
+    '  <script src="./bootstrap-v40.js?v=40"></script>\n  <script type="module" src="./pdf-cover-v40.js?v=40"></script>\n</head>'
+  );
 }
 
 async function enhancedHtmlResponse(response) {
-  const html = injectBootstrap(await response.text());
+  const html = enhanceHtml(await response.text());
   const headers = new Headers(response.headers);
   headers.delete("content-length");
   headers.delete("content-encoding");
@@ -52,6 +60,8 @@ self.addEventListener("activate", (event) => {
     const keys = await caches.keys();
     await Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key)));
     await self.clients.claim();
+
+    // Push already-open installed PWAs onto the repaired v40 HTML.
     const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
     await Promise.all(windows.map(async (client) => {
       try { await client.navigate(client.url); } catch (_) {}
