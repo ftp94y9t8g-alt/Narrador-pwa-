@@ -54,12 +54,12 @@
     <section id="libraryView" class="view">
       <header class="mainHeader">
         <div class="mainBrand"><div class="mainBrandMark">N</div><div><div class="mainBrandName">Narrador</div><div class="mainBrandSub">Mi colección</div></div></div>
+        <label class="homePlus libraryPlus" for="pdfInput2" aria-label="Importar PDF">＋</label>
+        <input id="pdfInput2" type="file" accept="application/pdf,.pdf" />
       </header>
 
       <div class="libraryTop">
         <div><div class="eyebrow">TU COLECCIÓN</div><h2>Mi biblioteca</h2><p>Todos tus libros, organizados en un solo lugar.</p></div>
-        <label class="libraryImport" for="pdfInput2">Importar PDF</label>
-        <input id="pdfInput2" type="file" accept="application/pdf,.pdf" />
       </div>
 
       <div class="searchBox"><span>⌕</span><input id="librarySearch" type="search" placeholder="Buscar por título o autor…" autocomplete="off" /></div>
@@ -139,7 +139,11 @@
     <section id="bookView" class="view">
       <button class="backBtn" data-go="library">‹ Biblioteca</button>
       <div class="bookHeader card">
-        <div id="cover" class="cover">NV</div>
+        <div class="bookCoverColumn">
+          <div id="cover" class="cover">NV</div>
+          <label id="bookCoverChange" class="bookCoverChange" for="bookCoverInput">Cambiar portada</label>
+          <input id="bookCoverInput" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif" />
+        </div>
         <div class="grow">
           <div class="eyebrow">LIBRO</div>
           <h2 id="bookTitle">Libro</h2>
@@ -218,7 +222,6 @@
     <button type="button" data-book-action="open">▣ Abrir ficha del libro</button>
     <button type="button" data-book-action="read">▱ Abrir para leer</button>
     <div class="menuDivider"></div>
-    <label id="coverActionNative" for="coverEditorInput" role="menuitem">▧ Editar portada</label>
     <button type="button" data-book-action="title">✎ Editar título</button>
     <button type="button" data-book-action="author">♙ Editar autor</button>
     <div class="menuDivider"></div>
@@ -242,11 +245,11 @@
   <script src="./continuous-ai-v12.js?v=16"></script>
   <script src="./interface-v16.js?v=16"></script>
   <script src="./interaction-v19.js?v=31"></script>
-  <script src="./cover-native-v31.js?v=31"></script>
+  <script src="./library-v33.js?v=33"></script>
   <script>
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.addEventListener("controllerchange", () => {
-        const key = "narrador-v31-reloaded";
+        const key = "narrador-v33-reloaded";
         if (sessionStorage.getItem(key)) return;
         sessionStorage.setItem(key, "1");
         location.reload();
