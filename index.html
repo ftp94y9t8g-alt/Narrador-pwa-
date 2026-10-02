@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0d0d10" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Narrador" />
+  <title>Narrador</title>
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">AUDIOBOOK STUDIO</div>
+        <h1>Narrador</h1>
+      </div>
+      <label class="importBtn">
+        <input id="pdfInput" type="file" accept="application/pdf,.pdf" />
+        <span>+ PDF</span>
+      </label>
+    </header>
+
+    <section id="libraryView" class="view active">
+      <div class="hero card">
+        <span class="pill">Desarrollo $0 · procesamiento local</span>
+        <h2>Convierte un PDF en una experiencia de audiolibro.</h2>
+        <p>Importa un libro, detecta capítulos y escúchalo con las mejores voces que tu iPhone exponga al navegador. El texto permanece en tu dispositivo.</p>
+        <label class="primary uploadLarge">
+          <input id="pdfInput2" type="file" accept="application/pdf,.pdf" />
+          <span>Importar un PDF</span>
+        </label>
+        <small>Usa únicamente contenido que tengas derecho a convertir para uso personal.</small>
+      </div>
+
+      <div class="sectionTitle">
+        <h3>Tu biblioteca</h3>
+        <button id="clearBtn" class="textBtn">Vaciar</button>
+      </div>
+      <div id="library" class="library"></div>
+      <div id="emptyState" class="empty card">
+        <div class="emptyIcon">◫</div>
+        <h3>Aún no hay libros</h3>
+        <p>Tu primer PDF aparecerá aquí.</p>
+      </div>
+    </section>
+
+    <section id="processingView" class="view">
+      <button class="backBtn" data-go="library">‹ Biblioteca</button>
+      <div class="processing card">
+        <div class="spinner"></div>
+        <h2 id="processingTitle">Analizando el libro…</h2>
+        <p id="processingStatus">Abriendo el PDF.</p>
+        <div class="progress"><div id="progressBar"></div></div>
+        <small id="processingDetail">El procesamiento ocurre en este dispositivo.</small>
+      </div>
+    </section>
+
+    <section id="bookView" class="view">
+      <button class="backBtn" data-go="library">‹ Biblioteca</button>
+      <div class="bookHeader card">
+        <div id="cover" class="cover">NV</div>
+        <div class="grow">
+          <div class="eyebrow">AUDIOBOOK</div>
+          <h2 id="bookTitle">Libro</h2>
+          <p id="bookMeta"></p>
+        </div>
+      </div>
+
+      <div class="card settingsCard">
+        <div class="fieldGrid">
+          <label>Estilo
+            <select id="styleSelect">
+              <option value="warm">Cálida</option>
+              <option value="cinematic">Cinematográfica</option>
+              <option value="expressive">Expresiva</option>
+              <option value="calm">Calmada</option>
+            </select>
+          </label>
+          <label>Voz
+            <select id="voiceSelect"></select>
+          </label>
+        </div>
+        <label class="rangeLabel">Velocidad
+          <input id="speedRange" type="range" min="0.80" max="1.15" step="0.05" value="0.95" />
+          <span id="speedLabel">0.95×</span>
+        </label>
+        <button id="previewBtn" class="primary">▶ Escuchar muestra</button>
+      </div>
+
+      <div class="sectionTitle"><h3>Capítulos</h3><span id="chapterCount"></span></div>
+      <div id="chapters" class="chapters"></div>
+    </section>
+
+    <section id="playerView" class="view">
+      <button class="backBtn" data-go="book">‹ Capítulos</button>
+      <div class="player card">
+        <div id="playerCover" class="cover big">NV</div>
+        <div class="eyebrow">REPRODUCIENDO</div>
+        <h2 id="playerChapter">Capítulo</h2>
+        <p id="playerBook"></p>
+
+        <div class="progress playerProgress"><div id="speechProgress"></div></div>
+        <div class="progressMeta"><span id="speechPercent">0%</span><span id="speechSegment">0 / 0</span></div>
+
+        <div class="transport">
+          <button id="prevBtn" aria-label="Fragmento anterior">↶</button>
+          <button id="playBtn" class="playBtn" aria-label="Reproducir">▶</button>
+          <button id="nextBtn" aria-label="Siguiente fragmento">↷</button>
+        </div>
+
+        <div class="currentText">
+          <div class="eyebrow">TEXTO ACTUAL</div>
+          <p id="currentText">Pulsa reproducir.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast"></div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
