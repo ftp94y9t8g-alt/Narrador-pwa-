@@ -1,10 +1,11 @@
-import { KokoroTTS } from "./kokoro-ios.js?v=10";
+import { KokoroTTS } from "./kokoro-ios.js?v=11";
 
 const MODEL_ID = "onnx-community/Kokoro-82M-v1.0-ONNX";
 const PREF_KEY = "narrador-voice-prefs-v10";
 let warmPromise = null;
 let previewAudio = null;
 let previewUrl = null;
+let restoring = false;
 
 const $ = (s) => document.querySelector(s);
 
@@ -13,7 +14,7 @@ function setNote(message, error = false) {
   if (!note) return;
   const strong = note.querySelector("strong");
   const span = note.querySelector("span");
-  if (strong) strong.textContent = error ? "IA local · problema de voz" : "IA local beta · v10";
+  if (strong) strong.textContent = error ? "IA local · problema de voz" : "IA local beta · v11";
   if (span) span.textContent = message;
 }
 
@@ -26,21 +27,34 @@ function languageFromUI() {
   return "es";
 }
 
+async function preparePronunciationOnly() {
+  try {
+    const language = languageFromUI();
+    if (language === "es") {
+      setNote("Preparando pronunciación española…");
+      await KokoroTTS.prepareLanguage("es");
+      setNote("Pronunciación lista. La IA neuronal se cargará cuando entres a escuchar.");
+    }
+  } catch (error) {
+    console.warn("Narrador: no se pudo preparar la pronunciación", error);
+  }
+}
+
 async function warmAI() {
   if (warmPromise) return warmPromise;
   warmPromise = (async () => {
-    setNote("Preparando la IA en segundo plano para reducir la espera…");
+    setNote("Preparando la IA en segundo plano…");
     const tts = await KokoroTTS.from_pretrained(MODEL_ID, {
       dtype: "q4",
-      device: navigator.gpu ? "webgpu" : "wasm",
+      device: "wasm",
     });
     try { await tts.prepareLanguage?.(languageFromUI()); } catch (_) {}
     window.__narradorWarmTTS = tts;
-    setNote(`IA preparada · ${tts.narradorDevice === "webgpu" ? "aceleración GPU" : "modo compatible"}.`);
+    setNote("IA preparada · modo estable para iPhone.");
     return tts;
   })().catch(error => {
     warmPromise = null;
-    console.warn("Narrador: no se pudo preparar la IA en segundo plano", error);
+    console.warn("Narrador: no se pudo preparar la IA", error);
     setNote("La IA se preparará cuando pulses reproducir.");
     throw error;
   });
@@ -76,6 +90,7 @@ function restorePrefs() {
   try { prefs = JSON.parse(localStorage.getItem(PREF_KEY) || "null"); } catch (_) {}
   if (!prefs) return;
 
+  restoring = true;
   const engine = $("#engineSelect");
   const language = $("#languageSelect");
   const style = $("#styleSelect");
@@ -95,18 +110,19 @@ function restorePrefs() {
   queueMicrotask(() => {
     const voice = $("#voiceSelect");
     if (voice && [...voice.options].some(o => o.value === prefs.voice)) voice.value = prefs.voice;
-  });
+    restoring = false;
 
-  if (prefs.engine === "kokoro") {
-    setTimeout(() => warmAI().catch(() => {}), 250);
-  }
+    // Important on iPhone: do not load the neural model just because the app
+    // restored the user's previous AI choice. Only prepare the lightweight
+    // pronunciation layer. The heavy model starts after an explicit interaction.
+    if (prefs.engine === "kokoro") preparePronunciationOnly();
+  });
 }
 
 function previewTextFor(language) {
-  if (language === "en") {
-    return "The night settled over the road, and for a moment everything fell silent.";
-  }
-  return "La noche cayó sobre el camino y, por un instante, todo quedó en silencio.";
+  return language === "en"
+    ? "The night fell, and everything became quiet."
+    : "La noche cayó y todo quedó en silencio.";
 }
 
 async function playFastPreview(button) {
@@ -134,7 +150,7 @@ async function playFastPreview(button) {
       stopPreview();
       button.disabled = false;
       button.textContent = original;
-      setNote("IA lista. Las muestras repetidas y fragmentos ya generados se reutilizan sin volver a calcularlos.");
+      setNote("IA lista. Las muestras repetidas se reutilizan sin volver a generarlas.");
     };
     previewAudio.onerror = () => {
       stopPreview();
@@ -153,11 +169,12 @@ async function playFastPreview(button) {
 }
 
 document.addEventListener("change", (event) => {
-  if (event.target?.matches?.("#engineSelect, #languageSelect, #voiceSelect, #styleSelect")) {
-    savePrefs();
-  }
-  if (event.target?.matches?.("#engineSelect") && event.target.value === "kokoro") {
-    warmAI().catch(() => {});
+  if (event.target?.matches?.("#engineSelect, #languageSelect, #voiceSelect, #styleSelect")) savePrefs();
+
+  if (!restoring && event.target?.matches?.("#engineSelect") && event.target.value === "kokoro") {
+    // Lightweight preloading only. The heavy model no longer starts automatically
+    // when Narrador launches, preventing Safari tab crashes.
+    preparePronunciationOnly();
   }
 }, true);
 
@@ -173,14 +190,20 @@ document.addEventListener("click", (event) => {
   playFastPreview(button);
 }, { capture: true });
 
+// When the user explicitly opens a book while AI is selected, begin the heavy
+// model load shortly afterward. This hides part of the wait without doing it on
+// app startup or during a service-worker reload.
+document.addEventListener("click", (event) => {
+  const openedBook = event.target?.closest?.(".bookRow, .continueInner");
+  if (!openedBook || $("#engineSelect")?.value !== "kokoro") return;
+  setTimeout(() => warmAI().catch(() => {}), 700);
+}, { capture: true });
+
 document.addEventListener("pointerdown", (event) => {
   if (event.target?.closest?.("#previewBtn, #playBtn") && $("#engineSelect")?.value === "kokoro") {
     warmAI().catch(() => {});
   }
 }, { capture: true, passive: true });
 
-window.addEventListener("DOMContentLoaded", () => {
-  restorePrefs();
-});
-
+window.addEventListener("DOMContentLoaded", restorePrefs);
 window.__narradorWarmAI = warmAI;
