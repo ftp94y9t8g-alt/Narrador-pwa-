@@ -23,13 +23,15 @@
   let installed = false;
   let observer = null;
 
-  function installLibraryPicker() {
+  function installLibraryPicker(allowCreate = false) {
     const header = document.querySelector("#libraryView .mainHeader");
     if (!header) return false;
 
-    // Reuse the original input node so any listener attached by app.js survives
-    // even if this repair runs later than expected.
+    // Wait for the parser to create the original #pdfInput2 before touching the
+    // Library header. This avoids duplicate IDs and guarantees app.js binds to
+    // this exact node later in the document.
     let input = document.querySelector("#pdfInput2");
+    if (!input && !allowCreate) return false;
     if (!input) {
       input = document.createElement("input");
       input.id = "pdfInput2";
@@ -72,10 +74,10 @@
   }
 
   function start() {
-    if (installLibraryPicker()) return;
+    if (installLibraryPicker(false)) return;
     if (observer) return;
     observer = new MutationObserver(() => {
-      if (installLibraryPicker()) {
+      if (installLibraryPicker(false)) {
         observer.disconnect();
         observer = null;
       }
@@ -85,6 +87,10 @@
 
   start();
   document.addEventListener("DOMContentLoaded", () => {
-    if (!installed) installLibraryPicker();
+    if (!installed) installLibraryPicker(true);
+    if (observer) {
+      observer.disconnect();
+      observer = null;
+    }
   }, { once: true });
 })();
