@@ -17,6 +17,15 @@ function setNote(message, error = false) {
   if (span) span.textContent = message;
 }
 
+function languageFromUI() {
+  const selected = $("#languageSelect")?.value || "auto";
+  if (selected === "es" || selected === "en") return selected;
+  const voice = $("#voiceSelect")?.value || "";
+  if (/^e[fm]_/.test(voice)) return "es";
+  if (/^[ab][fm]_/.test(voice)) return "en";
+  return "es";
+}
+
 async function warmAI() {
   if (warmPromise) return warmPromise;
   warmPromise = (async () => {
@@ -25,7 +34,7 @@ async function warmAI() {
       dtype: "q4",
       device: navigator.gpu ? "webgpu" : "wasm",
     });
-    try { await tts.prepareLanguage?.("es"); } catch (_) {}
+    try { await tts.prepareLanguage?.(languageFromUI()); } catch (_) {}
     window.__narradorWarmTTS = tts;
     setNote(`IA preparada · ${tts.narradorDevice === "webgpu" ? "aceleración GPU" : "modo compatible"}.`);
     return tts;
@@ -110,8 +119,7 @@ async function playFastPreview(button) {
 
   try {
     const tts = await warmAI();
-    const selectedLanguage = $("#languageSelect")?.value || "auto";
-    const language = selectedLanguage === "en" ? "en" : "es";
+    const language = languageFromUI();
     let voice = $("#voiceSelect")?.value || (language === "es" ? "em_alex" : "am_michael");
 
     if (language === "es" && !/^e[fm]_/.test(voice)) voice = /^.f_/.test(voice) ? "ef_dora" : "em_alex";
@@ -144,7 +152,6 @@ async function playFastPreview(button) {
   }
 }
 
-// Warm the engine as soon as the user chooses AI, before they press Play.
 document.addEventListener("change", (event) => {
   if (event.target?.matches?.("#engineSelect, #languageSelect, #voiceSelect, #styleSelect")) {
     savePrefs();
@@ -158,8 +165,6 @@ document.addEventListener("input", (event) => {
   if (event.target?.matches?.("#speedRange")) savePrefs();
 }, true);
 
-// Replace only the AI voice sample with a much shorter, cached sample.
-// The normal book player remains controlled by app.js.
 document.addEventListener("click", (event) => {
   const button = event.target?.closest?.("#previewBtn");
   if (!button || $("#engineSelect")?.value !== "kokoro") return;
@@ -168,7 +173,6 @@ document.addEventListener("click", (event) => {
   playFastPreview(button);
 }, { capture: true });
 
-// A touch on Play is another chance to start preparation immediately.
 document.addEventListener("pointerdown", (event) => {
   if (event.target?.closest?.("#previewBtn, #playBtn") && $("#engineSelect")?.value === "kokoro") {
     warmAI().catch(() => {});
