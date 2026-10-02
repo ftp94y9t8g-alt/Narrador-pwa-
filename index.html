@@ -10,7 +10,14 @@
   <title>Narrador</title>
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="./styles.css?v=4" />
+  <link rel="stylesheet" href="./styles.css?v=5" />
+  <script type="importmap">
+  {
+    "imports": {
+      "https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/dist/kokoro.web.js": "./kokoro-ios.js?v=5"
+    }
+  }
+  </script>
 </head>
 <body>
   <main class="shell">
@@ -98,7 +105,7 @@
 
         <div id="aiNote" class="aiNote hidden">
           <strong>IA local beta</strong>
-          <span>La primera vez descarga el modelo al iPhone. No hay pago por uso.</span>
+          <span>La primera vez descarga un modelo optimizado al iPhone. No hay pago por uso.</span>
         </div>
 
         <div class="fieldGrid">
@@ -163,6 +170,6 @@
 
   <div id="toast" class="toast"></div>
   <script type="module" src="./detector-v4.js?v=4"></script>
-  <script type="module" src="./app.js?v=4"></script>
+  <script type="module" src="./app.js?v=5"></script>
 </body>
 </html>
