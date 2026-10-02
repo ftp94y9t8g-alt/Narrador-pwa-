@@ -10,12 +10,13 @@
   <title>Narrador</title>
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="./styles.css?v=15" />
-  <link rel="stylesheet" href="./interface-v15.css?v=15" />
+  <link rel="stylesheet" href="./styles.css?v=16" />
+  <link rel="stylesheet" href="./interface-v15.css?v=16" />
+  <link rel="stylesheet" href="./interface-v16.css?v=16" />
   <script type="importmap">
   {
     "imports": {
-      "https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/dist/kokoro.web.js": "./kokoro-ios.js?v=15"
+      "https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/dist/kokoro.web.js": "./kokoro-ios.js?v=16"
     }
   }
   </script>
@@ -32,12 +33,7 @@
         <input id="pdfInput" type="file" accept="application/pdf,.pdf" />
       </header>
 
-      <div class="pageIntro">
-        <div class="eyebrow">TU ESPACIO DE ESCUCHA</div>
-        <h2>Inicio</h2>
-        <p>Continúa escuchando o abre uno de tus libros recientes.</p>
-      </div>
-
+      <div id="homeFeatured" class="homeFeatured hidden"></div>
       <div id="continueCard" class="continueCard hidden homeHero"></div>
 
       <div id="homeEmpty" class="homeEmpty">
@@ -63,16 +59,27 @@
         <input id="pdfInput2" type="file" accept="application/pdf,.pdf" />
       </div>
 
-      <div class="searchBox"><span>⌕</span><input id="librarySearch" type="search" placeholder="Buscar en mi biblioteca…" autocomplete="off" /></div>
+      <div class="searchBox"><span>⌕</span><input id="librarySearch" type="search" placeholder="Buscar por título o autor…" autocomplete="off" /></div>
       <div class="filterBar" aria-label="Filtros de biblioteca">
         <button class="filterChip active" type="button" data-filter="all">Todos</button>
         <button class="filterChip" type="button" data-filter="recent">Recientes</button>
         <button class="filterChip" type="button" data-filter="progress">En progreso</button>
       </div>
 
+      <div class="libraryUtilityRow">
+        <div class="libraryUtilityLeft">
+          <div class="viewToggle" aria-label="Vista de biblioteca">
+            <button id="gridViewBtn" type="button" aria-label="Vista de cuadrícula">▦</button>
+            <button id="listViewBtn" type="button" aria-label="Vista de lista">☰</button>
+          </div>
+          <button id="organizeBtn" class="organizeBtn" type="button">Organizar</button>
+        </div>
+        <div class="libraryHint">Puedes ordenar tus libros manualmente.</div>
+      </div>
+
       <div id="libraryContent">
-        <div class="sectionTitle"><h3>Mis libros</h3><button id="clearBtn" class="textBtn">Vaciar</button></div>
-        <div id="library" class="library"></div>
+        <div class="sectionTitle"><h3>Mis libros</h3><button id="clearBtn" class="textBtn legacyClearHidden" aria-hidden="true" tabindex="-1">Vaciar</button></div>
+        <div id="library" class="library" data-view="grid"></div>
       </div>
 
       <div id="emptyState" class="empty">
@@ -109,7 +116,7 @@
       <div class="settingsStack">
         <button id="notificationsRow" class="settingRow" type="button"><div class="settingIcon">♢</div><div class="settingText"><strong>Notificaciones</strong><span id="notificationState">Toca para permitir avisos</span></div><div class="settingAction">›</div></button>
         <div class="settingRow"><div class="settingIcon">▣</div><div class="settingText"><strong>Almacenamiento offline</strong><span id="storageLabel">Calculando espacio…</span><div class="storageBar"><i id="storageBarFill"></i></div></div></div>
-        <div class="settingRow"><div class="settingIcon">ⓘ</div><div class="settingText"><strong>Acerca de Narrador</strong><span>Convierte PDFs en experiencias de audio</span></div></div>
+        <div class="settingRow"><div class="settingIcon">ⓘ</div><div class="settingText"><strong>Acerca de Narrador</strong><span>Convierte PDFs en experiencias de audio y lectura</span></div></div>
       </div>
       <div class="settingsNote">Cuando añadamos la generación completa de audiolibros, esta sección también controlará descargas offline, calidad de audio y el aviso “Tu audiolibro está listo”.</div>
     </section>
@@ -130,7 +137,13 @@
       <button class="backBtn" data-go="library">‹ Biblioteca</button>
       <div class="bookHeader card">
         <div id="cover" class="cover">NV</div>
-        <div class="grow"><div class="eyebrow">AUDIOBOOK</div><h2 id="bookTitle">Libro</h2><p id="bookMeta"></p></div>
+        <div class="grow">
+          <div class="eyebrow">LIBRO</div>
+          <h2 id="bookTitle">Libro</h2>
+          <div id="bookAuthorLine">Autor no especificado</div>
+          <p id="bookMeta"></p>
+          <button id="readBookBtn" class="readBookBtn" type="button">▱ Abrir para leer</button>
+        </div>
       </div>
 
       <div class="card settingsCard">
@@ -149,6 +162,27 @@
       </div>
       <div class="sectionTitle"><h3>Capítulos</h3><span id="chapterCount"></span></div>
       <div id="chapters" class="chapters"></div>
+    </section>
+
+    <section id="readerView" class="view">
+      <div class="readerHeader">
+        <button id="readerBack" class="backBtn" type="button">‹ Volver</button>
+        <div class="readerToolbar">
+          <button id="readerFontDown" type="button" aria-label="Disminuir texto">A−</button>
+          <button id="readerFontUp" type="button" aria-label="Aumentar texto">A+</button>
+          <button id="readerTheme" type="button" aria-label="Cambiar tema">◐</button>
+          <button id="readerListen" class="readerListen" type="button">▶ Escuchar</button>
+        </div>
+      </div>
+      <div class="readerBookMeta">
+        <div id="readerCover" class="readerCover">NV</div>
+        <div><div class="eyebrow">LEYENDO</div><h2 id="readerBookTitle">Libro</h2><p id="readerAuthor">Autor</p></div>
+      </div>
+      <article class="readerPaper">
+        <div class="readerChapterBar"><button id="readerPrev" type="button">‹</button><select id="readerChapterSelect"></select><button id="readerNext" type="button">›</button></div>
+        <h3 id="readerChapterTitle">Capítulo</h3>
+        <div id="readerText" class="readerText" data-font="19"></div>
+      </article>
     </section>
 
     <section id="playerView" class="view">
@@ -177,21 +211,41 @@
     <button class="navItem" type="button" data-tab="settings"><span class="navIcon">⚙</span><span class="navLabel">Ajustes</span></button>
   </nav>
 
+  <div id="bookActionMenu" class="bookActionMenu" role="menu">
+    <button type="button" data-book-action="open">▣ Abrir ficha del libro</button>
+    <button type="button" data-book-action="read">▱ Abrir para leer</button>
+    <div class="menuDivider"></div>
+    <button type="button" data-book-action="cover">▧ Editar portada</button>
+    <button type="button" data-book-action="title">✎ Editar título</button>
+    <button type="button" data-book-action="author">♙ Editar autor</button>
+    <div class="menuDivider"></div>
+    <button type="button" class="danger" data-book-action="delete">⌫ Eliminar libro</button>
+  </div>
+
+  <div id="editBookModal" class="editBookModal" aria-hidden="true">
+    <div class="editBookSheet">
+      <h3 id="editModalTitle">Editar libro</h3>
+      <label><span id="editModalLabel">Título</span><input id="editModalInput" type="text" maxlength="180" /></label>
+      <div class="editBookActions"><button id="editModalCancel" type="button">Cancelar</button><button id="editModalSave" type="button">Guardar</button></div>
+    </div>
+  </div>
+  <input id="coverEditorInput" type="file" accept="image/*" />
+
   <div id="toast" class="toast"></div>
-  <script src="./ios-audio-v9.js?v=15"></script>
-  <script type="module" src="./ai-boost-v10.js?v=15"></script>
-  <script type="module" src="./detector-v4.js?v=15"></script>
-  <script type="module" src="./app.js?v=15"></script>
-  <script src="./continuous-ai-v12.js?v=15"></script>
-  <script src="./interface-v15.js?v=15"></script>
+  <script src="./ios-audio-v9.js?v=16"></script>
+  <script type="module" src="./ai-boost-v10.js?v=16"></script>
+  <script type="module" src="./detector-v4.js?v=16"></script>
+  <script type="module" src="./app.js?v=16"></script>
+  <script src="./continuous-ai-v12.js?v=16"></script>
+  <script src="./interface-v16.js?v=16"></script>
   <script>
     window.addEventListener("load", async () => {
       if (!("serviceWorker" in navigator)) return;
       try {
-        const reg = await navigator.serviceWorker.register("./sw.js?v=15", { updateViaCache: "none" });
+        const reg = await navigator.serviceWorker.register("./sw.js?v=16", { updateViaCache: "none" });
         await reg.update();
         navigator.serviceWorker.addEventListener("controllerchange", () => {
-          const key = "narrador-v15-reloaded";
+          const key = "narrador-v16-reloaded";
           if (sessionStorage.getItem(key)) return;
           sessionStorage.setItem(key,"1");
           location.reload();
