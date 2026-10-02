@@ -1,11 +1,13 @@
-const CACHE = "narrador-v16-final";
+const CACHE = "narrador-v17";
 const CORE = [
   "./",
   "./index.html",
   "./styles.css?v=16",
   "./interface-v15.css?v=16",
   "./interface-v16.css?v=16",
+  "./interface-v17.css?v=17",
   "./interface-v16.js?v=16",
+  "./nav-fix-v17.js?v=17",
   "./app.js?v=16",
   "./detector-v4.js?v=16",
   "./kokoro-ios.js?v=16",
@@ -28,11 +30,45 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+function enhanceHtml(html) {
+  if (!html.includes("interface-v17.css")) {
+    html = html.replace("</head>", '  <link rel="stylesheet" href="./interface-v17.css?v=17" />\n</head>');
+  }
+  if (!html.includes("nav-fix-v17.js")) {
+    html = html.replace("</body>", '  <script src="./nav-fix-v17.js?v=17"></script>\n</body>');
+  }
+  return html;
+}
+
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   const url = new URL(event.request.url);
 
-  if (url.origin === self.location.origin && /(?:index\.html|app\.js|styles\.css|interface-v15\.css|interface-v16\.css|interface-v16\.js|detector-v4\.js|kokoro-ios\.js|ios-audio-v9\.js|ai-boost-v10\.js|continuous-ai-v12\.js|\/$)/.test(url.pathname)) {
+  const isAppHtml = url.origin === self.location.origin &&
+    (event.request.mode === "navigate" || /(?:index\.html|\/$)/.test(url.pathname));
+
+  if (isAppHtml) {
+    event.respondWith(
+      fetch(event.request, { cache: "no-store" })
+        .then(async (response) => {
+          const html = enhanceHtml(await response.text());
+          return new Response(html, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: {"Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store"}
+          });
+        })
+        .catch(async () => {
+          const cached = await caches.match("./index.html") || await caches.match("./");
+          if (!cached) throw new Error("Narrador offline HTML unavailable");
+          const html = enhanceHtml(await cached.text());
+          return new Response(html, {headers:{"Content-Type":"text/html; charset=utf-8"}});
+        })
+    );
+    return;
+  }
+
+  if (url.origin === self.location.origin && /(?:app\.js|styles\.css|interface-v15\.css|interface-v16\.css|interface-v17\.css|interface-v16\.js|nav-fix-v17\.js|detector-v4\.js|kokoro-ios\.js|ios-audio-v9\.js|ai-boost-v10\.js|continuous-ai-v12\.js)/.test(url.pathname)) {
     event.respondWith(
       fetch(event.request, { cache: "no-store" })
         .then((response) => {
