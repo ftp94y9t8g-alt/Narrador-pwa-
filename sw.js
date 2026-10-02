@@ -1,12 +1,13 @@
-const CACHE = "narrador-v48";
+const CACHE = "narrador-v49";
 const CORE = [
   "./",
   "./index.html",
-  "./bootstrap-v40.js?v=48",
-  "./pdf-cover-v40.js?v=48",
-  "./home-player-v42.js?v=48",
-  "./home-late-v47.js?v=48",
-  "./library-firsttap-v43.js?v=48",
+  "./bootstrap-v40.js?v=49",
+  "./pdf-cover-v40.js?v=49",
+  "./home-player-v42.js?v=49",
+  "./home-late-v47.js?v=49",
+  "./ios-speech-history-v49.js?v=49",
+  "./library-firsttap-v43.js?v=49",
   "./styles.css?v=16",
   "./interface-v15.css?v=16",
   "./interface-v16.css?v=16",
@@ -35,16 +36,17 @@ function enhanceHtml(html) {
     .replace(/\s*<script[^>]*src=["']\.\/home-fix-v44\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/home-recovery-v46\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/home-late-v47\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
+    .replace(/\s*<script[^>]*src=["']\.\/ios-speech-history-v49\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/library-firsttap-v43\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n");
 
   const withHead = cleaned.replace(
     "</head>",
-    '  <script src="./bootstrap-v40.js?v=48"></script>\n  <script type="module" src="./pdf-cover-v40.js?v=48"></script>\n  <script src="./home-player-v42.js?v=48"></script>\n  <script src="./library-firsttap-v43.js?v=48"></script>\n</head>'
+    '  <script src="./bootstrap-v40.js?v=49"></script>\n  <script type="module" src="./pdf-cover-v40.js?v=49"></script>\n  <script src="./home-player-v42.js?v=49"></script>\n  <script src="./library-firsttap-v43.js?v=49"></script>\n</head>'
   );
 
   return withHead.replace(
     "</body>",
-    '  <script src="./home-late-v47.js?v=48"></script>\n</body>'
+    '  <script src="./home-late-v47.js?v=49"></script>\n  <script src="./ios-speech-history-v49.js?v=49"></script>\n</body>'
   );
 }
 
