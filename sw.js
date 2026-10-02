@@ -1,13 +1,15 @@
-const CACHE = "narrador-v49";
+const CACHE = "narrador-v50";
 const CORE = [
   "./",
   "./index.html",
-  "./bootstrap-v40.js?v=49",
-  "./pdf-cover-v40.js?v=49",
-  "./home-player-v42.js?v=49",
-  "./home-late-v47.js?v=49",
-  "./ios-speech-history-v49.js?v=49",
-  "./library-firsttap-v43.js?v=49",
+  "./boot-v50.js?v=50",
+  "./bootstrap-v40.js?v=50",
+  "./pdf-cover-v40.js?v=50",
+  "./home-player-v42.js?v=50",
+  "./home-late-v47.js?v=50",
+  "./ai-audiobook-v50.js?v=50",
+  "./ios-speech-history-v49.js?v=50",
+  "./library-firsttap-v43.js?v=50",
   "./styles.css?v=16",
   "./interface-v15.css?v=16",
   "./interface-v16.css?v=16",
@@ -29,6 +31,7 @@ const CORE = [
 
 function enhanceHtml(html) {
   const cleaned = html
+    .replace(/\s*<script[^>]*src=["']\.\/boot-v50\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/bootstrap-v38\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/bootstrap-v40\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/pdf-cover-v40\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
@@ -36,17 +39,18 @@ function enhanceHtml(html) {
     .replace(/\s*<script[^>]*src=["']\.\/home-fix-v44\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/home-recovery-v46\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/home-late-v47\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
+    .replace(/\s*<script[^>]*src=["']\.\/ai-audiobook-v50\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/ios-speech-history-v49\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/library-firsttap-v43\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n");
 
   const withHead = cleaned.replace(
     "</head>",
-    '  <script src="./bootstrap-v40.js?v=49"></script>\n  <script type="module" src="./pdf-cover-v40.js?v=49"></script>\n  <script src="./home-player-v42.js?v=49"></script>\n  <script src="./library-firsttap-v43.js?v=49"></script>\n</head>'
+    '  <script src="./boot-v50.js?v=50"></script>\n  <script src="./bootstrap-v40.js?v=50"></script>\n  <script type="module" src="./pdf-cover-v40.js?v=50"></script>\n  <script src="./home-player-v42.js?v=50"></script>\n  <script src="./library-firsttap-v43.js?v=50"></script>\n</head>'
   );
 
   return withHead.replace(
     "</body>",
-    '  <script src="./home-late-v47.js?v=49"></script>\n  <script src="./ios-speech-history-v49.js?v=49"></script>\n</body>'
+    '  <script src="./home-late-v47.js?v=50"></script>\n  <script src="./ai-audiobook-v50.js?v=50"></script>\n  <script src="./ios-speech-history-v49.js?v=50"></script>\n</body>'
   );
 }
 
@@ -75,6 +79,20 @@ self.addEventListener("activate", (event) => {
     const keys = await caches.keys();
     await Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key)));
     await self.clients.claim();
+  })());
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification?.close?.();
+  event.waitUntil((async () => {
+    const target = new URL("./", self.registration.scope).href;
+    const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+    for (const client of windows) {
+      if ("focus" in client) {
+        try { await client.focus(); return; } catch (_) {}
+      }
+    }
+    if (self.clients.openWindow) await self.clients.openWindow(target);
   })());
 });
 
