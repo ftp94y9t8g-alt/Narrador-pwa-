@@ -1,6 +1,6 @@
-// Narrador v11: stable iPhone/Safari compatibility layer for local Kokoro voices.
-// Keeps the working Spanish phonemizer and audio cache from v9/v10, but avoids
-// eager GPU startup on iPhone, which can exhaust Safari's web-process memory.
+// Narrador v12: stable iPhone/Safari compatibility layer for local Kokoro voices.
+// Keeps the working Spanish phonemizer, but limits raw-audio memory while the
+// continuous player prepares upcoming passages in the background.
 
 const KOKORO_URLS = [
   "https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/+esm",
@@ -21,7 +21,7 @@ function setVoiceNote(message, isError = false) {
   if (!note) return;
   const strong = note.querySelector("strong");
   const span = note.querySelector("span");
-  if (strong) strong.textContent = isError ? "IA local · problema de voz" : "IA local beta · v11";
+  if (strong) strong.textContent = isError ? "IA local · problema de voz" : "IA local beta · v12";
   if (span) span.textContent = message;
 }
 
@@ -116,7 +116,9 @@ function addNarradorGeneration(tts) {
   const originalGenerate = tts.generate.bind(tts);
   const cache = new Map();
   const pending = new Map();
-  const MAX_CACHE = 12;
+  // RawAudio keeps Float32 PCM in memory. A small cache is safer on iPhone;
+  // v12 also maintains a tiny Blob buffer for the passages immediately ahead.
+  const MAX_CACHE = 4;
 
   async function generateUncached(text, { voice = "af_heart", speed = 1 } = {}) {
     if (!/^e[fm]_/.test(voice)) return originalGenerate(text, { voice, speed });
