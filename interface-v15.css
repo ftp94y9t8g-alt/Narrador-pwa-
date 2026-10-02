@@ -1,0 +1,82 @@
+/* Narrador interface v15: Inicio, Biblioteca, Historial y Ajustes */
+.mainHeader{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;padding:2px 2px 0}
+.mainBrand{display:flex;align-items:center;gap:11px}
+.mainBrandMark{width:39px;height:39px;border-radius:13px;display:grid;place-items:center;color:#fff;font-weight:900;font-size:18px;background:linear-gradient(145deg,#2f6df6,#7558ff);box-shadow:0 8px 20px rgba(47,109,246,.22)}
+.mainBrandName{font-size:23px;font-weight:850;letter-spacing:-.035em}
+.mainBrandSub{font-size:11px;color:#8490a3;margin-top:2px}
+.homePlus{width:46px;height:46px;border-radius:15px;background:#fff;border:1px solid #e5e9f0;display:grid;place-items:center;color:#2f6df6;font-size:29px;font-weight:600;box-shadow:0 8px 20px rgba(28,39,64,.09);cursor:pointer}
+.pageIntro{margin:2px 2px 24px}
+.pageIntro h2{font-size:34px;margin:0 0 7px;letter-spacing:-.04em}
+.pageIntro p{margin:0;font-size:15px}
+.homeHero{margin-top:10px}
+.homeSection{margin-top:30px}
+.homeSectionHead,.libraryToolbar,.historyHead,.settingsHead{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.homeSectionHead h3,.libraryToolbar h2,.historyHead h2,.settingsHead h2{margin:0;letter-spacing:-.03em}
+.homeRecent{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin-top:13px}
+.recentBook{border:0;background:transparent;text-align:left;padding:0;color:#111827}
+.recentCover{aspect-ratio:3/4;border-radius:15px;background:linear-gradient(155deg,#293653,#111827 62%,#3b4f82);color:white;display:grid;place-items:center;font-size:24px;font-weight:900;box-shadow:0 10px 25px rgba(17,24,39,.14)}
+.recentBook h4{font-size:14px;margin:9px 1px 3px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.recentBook p{font-size:12px;margin:0}
+.homeEmpty{background:#fff;border:1px dashed #d8deea;border-radius:24px;padding:34px 24px;text-align:center;box-shadow:0 8px 24px rgba(28,39,64,.04)}
+.homeEmptyIcon{width:62px;height:62px;border-radius:20px;background:#edf3ff;color:#2f6df6;display:grid;place-items:center;margin:0 auto 14px;font-size:26px}
+.homeEmpty h3{margin-bottom:7px}
+.homeEmpty p{margin:0}
+
+.libraryTop{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px}
+.libraryTop h2{font-size:32px;margin:0 0 4px;letter-spacing:-.04em}
+.libraryTop p{margin:0}
+.libraryImport{display:inline-flex;align-items:center;justify-content:center;gap:7px;background:linear-gradient(145deg,#2f6df6,#4b82ff);color:white;border-radius:14px;padding:13px 17px;font-weight:850;box-shadow:0 10px 24px rgba(47,109,246,.20);cursor:pointer;white-space:nowrap}
+.libraryImport::before{content:'＋';font-size:18px}
+.searchBox{display:flex;align-items:center;gap:9px;background:#fff;border:1px solid #dfe4ed;border-radius:15px;padding:0 14px;margin-bottom:13px;box-shadow:0 7px 20px rgba(28,39,64,.04)}
+.searchBox span{color:#7d8797;font-size:18px}
+.searchBox input{width:100%;border:0;outline:0;background:transparent;padding:13px 0;font-size:15px;color:#111827}
+.filterBar{display:flex;gap:8px;overflow:auto;padding:1px 0 3px;margin-bottom:18px;scrollbar-width:none}
+.filterBar::-webkit-scrollbar{display:none}
+.filterChip{border:1px solid #dfe4ed;background:#fff;color:#657087;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;white-space:nowrap}
+.filterChip.active{background:#2f6df6;border-color:#2f6df6;color:white}
+
+.historyList{display:grid;gap:12px;margin-top:17px}
+.historyRow{width:100%;border:1px solid #e2e6ee;background:#fff;border-radius:18px;padding:13px;display:flex;align-items:center;gap:13px;text-align:left;color:#111827;box-shadow:0 7px 20px rgba(28,39,64,.05)}
+.historyCover{width:58px;height:78px;border-radius:10px;background:linear-gradient(155deg,#293653,#111827 62%,#3b4f82);color:white;display:grid;place-items:center;font-weight:900;flex:none}
+.historyMeta{flex:1;min-width:0}
+.historyMeta h4{margin:0 0 4px;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.historyMeta p{margin:0 0 8px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.historyProgress{height:5px;background:#e8ebf2;border-radius:99px;overflow:hidden}
+.historyProgress i{display:block;height:100%;background:#2f6df6;border-radius:99px}
+.historyPlay{width:38px;height:38px;border-radius:50%;background:#eef3ff;color:#2f6df6;display:grid;place-items:center;flex:none;padding-left:2px}
+.historyEmpty{padding:44px 20px;text-align:center;background:#fff;border:1px dashed #d8deea;border-radius:22px;color:#7b8493}
+
+.settingsStack{display:grid;gap:11px;margin-top:18px}
+.settingGroupLabel{font-size:11px;font-weight:850;letter-spacing:.14em;color:#98a1b0;margin:22px 3px 8px;text-transform:uppercase}
+.settingRow{width:100%;display:flex;align-items:center;gap:13px;background:#fff;border:1px solid #e2e6ee;border-radius:17px;padding:14px 15px;color:#111827;box-shadow:0 6px 18px rgba(28,39,64,.04)}
+.settingIcon{width:39px;height:39px;border-radius:12px;background:#edf3ff;color:#2f6df6;display:grid;place-items:center;font-size:19px;flex:none}
+.settingText{flex:1;min-width:0}
+.settingText strong{display:block;font-size:15px;margin-bottom:2px}
+.settingText span{display:block;color:#7a8494;font-size:12px}
+.settingRow select{width:auto;max-width:46%;margin:0;background:#f7f8fb;padding:8px 28px 8px 10px;font-size:13px}
+.settingAction{border:0;background:transparent;color:#9aa3b2;font-size:21px;padding:3px}
+.settingsNote{background:#f1f5ff;border:1px solid #dce6ff;color:#59709b;border-radius:16px;padding:13px 14px;font-size:13px;line-height:1.45;margin-top:15px}
+.storageBar{height:6px;background:#edf0f5;border-radius:99px;overflow:hidden;margin-top:7px}
+.storageBar i{height:100%;display:block;background:linear-gradient(90deg,#2f6df6,#7558ff);border-radius:99px;width:0}
+
+.bottomNav.fourTabs{grid-template-columns:repeat(4,1fr);width:min(690px,calc(100% - 24px));height:72px}
+.bottomNav.fourTabs .navItem{flex-direction:column;gap:3px;padding:6px 4px;font-size:10px}
+.bottomNav.fourTabs .navIcon{font-size:20px}
+.bottomNav.fourTabs .navItem.active{background:#edf3ff;color:#2f6df6}
+body[data-main-tab='home'] .navItem[data-tab='home'],body[data-main-tab='library'] .navItem[data-tab='library'],body[data-main-tab='history'] .navItem[data-tab='history'],body[data-main-tab='settings'] .navItem[data-tab='settings']{background:#edf3ff;color:#2f6df6}
+body[data-detail-view='1'] .bottomNav{display:none}
+
+@media(max-width:700px){
+  .homeRecent{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .libraryTop{align-items:flex-start;flex-direction:column}
+  .libraryImport{width:100%}
+}
+@media(max-width:560px){
+  .mainHeader{margin-bottom:22px}
+  .mainBrandSub{display:none}
+  .pageIntro h2,.libraryTop h2{font-size:31px}
+  .homeRecent{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .bottomNav.fourTabs{height:70px}
+  .bottomNav.fourTabs .navLabel{font-size:9.5px}
+  .settingRow select{max-width:50%}
+}
