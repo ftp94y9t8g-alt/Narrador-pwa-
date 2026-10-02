@@ -1,10 +1,11 @@
-const CACHE = "narrador-v42";
+const CACHE = "narrador-v43";
 const CORE = [
   "./",
   "./index.html",
-  "./bootstrap-v40.js?v=42",
-  "./pdf-cover-v40.js?v=42",
-  "./home-player-v42.js?v=42",
+  "./bootstrap-v40.js?v=43",
+  "./pdf-cover-v40.js?v=43",
+  "./home-player-v42.js?v=43",
+  "./library-firsttap-v43.js?v=43",
   "./styles.css?v=16",
   "./interface-v15.css?v=16",
   "./interface-v16.css?v=16",
@@ -29,11 +30,12 @@ function enhanceHtml(html) {
     .replace(/\s*<script[^>]*src=["']\.\/bootstrap-v38\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/bootstrap-v40\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/pdf-cover-v40\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
-    .replace(/\s*<script[^>]*src=["']\.\/home-player-v42\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n");
+    .replace(/\s*<script[^>]*src=["']\.\/home-player-v42\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
+    .replace(/\s*<script[^>]*src=["']\.\/library-firsttap-v43\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n");
 
   return cleaned.replace(
     "</head>",
-    '  <script src="./bootstrap-v40.js?v=42"></script>\n  <script type="module" src="./pdf-cover-v40.js?v=42"></script>\n  <script src="./home-player-v42.js?v=42"></script>\n</head>'
+    '  <script src="./bootstrap-v40.js?v=43"></script>\n  <script type="module" src="./pdf-cover-v40.js?v=43"></script>\n  <script src="./home-player-v42.js?v=43"></script>\n  <script src="./library-firsttap-v43.js?v=43"></script>\n</head>'
   );
 }
 
@@ -63,7 +65,6 @@ self.addEventListener("activate", (event) => {
     await Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key)));
     await self.clients.claim();
 
-    // Push already-open installed PWAs onto the v42 Home player.
     const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
     await Promise.all(windows.map(async (client) => {
       try { await client.navigate(client.url); } catch (_) {}
