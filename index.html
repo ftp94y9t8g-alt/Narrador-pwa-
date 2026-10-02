@@ -29,7 +29,7 @@
       <div class="hero card">
         <span class="pill">Desarrollo $0 · procesamiento local</span>
         <h2>Convierte un PDF en una experiencia de audiolibro.</h2>
-        <p>Importa un libro, detecta capítulos y escúchalo con las mejores voces que tu iPhone exponga al navegador. El texto permanece en tu dispositivo.</p>
+        <p>Importa un libro, detecta capítulos y escúchalo directamente desde tu iPhone. El texto permanece en tu dispositivo.</p>
         <label class="primary uploadLarge">
           <input id="pdfInput2" type="file" accept="application/pdf,.pdf" />
           <span>Importar un PDF</span>
@@ -72,6 +72,30 @@
       </div>
 
       <div class="card settingsCard">
+        <div class="fieldGrid three">
+          <label>Motor de voz
+            <select id="engineSelect">
+              <option value="system">iPhone · rápido</option>
+              <option value="kokoro">IA local · más natural (beta)</option>
+            </select>
+          </label>
+          <label>Idioma
+            <select id="languageSelect">
+              <option value="auto">Automático</option>
+              <option value="es">Español</option>
+              <option value="en">English</option>
+            </select>
+          </label>
+          <label>Voz
+            <select id="voiceSelect"></select>
+          </label>
+        </div>
+
+        <div id="aiNote" class="aiNote hidden">
+          <strong>IA local beta</strong>
+          <span>La primera vez descarga un modelo abierto al iPhone. No hay suscripción ni pago por uso. Puede tardar y consumir varios cientos de MB.</span>
+        </div>
+
         <div class="fieldGrid">
           <label>Estilo
             <select id="styleSelect">
@@ -81,14 +105,12 @@
               <option value="calm">Calmada</option>
             </select>
           </label>
-          <label>Voz
-            <select id="voiceSelect"></select>
+          <label class="rangeLabel">Velocidad
+            <input id="speedRange" type="range" min="0.80" max="1.15" step="0.05" value="0.95" />
+            <span id="speedLabel">0.95×</span>
           </label>
         </div>
-        <label class="rangeLabel">Velocidad
-          <input id="speedRange" type="range" min="0.80" max="1.15" step="0.05" value="0.95" />
-          <span id="speedLabel">0.95×</span>
-        </label>
+
         <button id="previewBtn" class="primary">▶ Escuchar muestra</button>
       </div>
 
@@ -97,7 +119,18 @@
     </section>
 
     <section id="playerView" class="view">
-      <button class="backBtn" data-go="book">‹ Capítulos</button>
+      <button class="backBtn" data-go="book">‹ Libro</button>
+
+      <div class="chapterPicker card compactCard">
+        <label>Ir a capítulo
+          <select id="playerChapterSelect"></select>
+        </label>
+        <div class="chapterNavBtns">
+          <button id="prevChapterBtn">‹ Anterior</button>
+          <button id="nextChapterBtn">Siguiente ›</button>
+        </div>
+      </div>
+
       <div class="player card">
         <div id="playerCover" class="cover big">NV</div>
         <div class="eyebrow">REPRODUCIENDO</div>
