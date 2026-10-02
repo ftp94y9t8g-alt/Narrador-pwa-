@@ -13,6 +13,9 @@
   <link rel="stylesheet" href="./styles.css?v=16" />
   <link rel="stylesheet" href="./interface-v15.css?v=16" />
   <link rel="stylesheet" href="./interface-v16.css?v=16" />
+  <link rel="stylesheet" href="./interface-v17.css?v=17" />
+  <link rel="stylesheet" href="./interface-v18.css?v=18" />
+  <link rel="stylesheet" href="./interface-v19.css?v=31" />
   <script type="importmap">
   {
     "imports": {
@@ -215,7 +218,7 @@
     <button type="button" data-book-action="open">▣ Abrir ficha del libro</button>
     <button type="button" data-book-action="read">▱ Abrir para leer</button>
     <div class="menuDivider"></div>
-    <button type="button" data-book-action="cover">▧ Editar portada</button>
+    <label id="coverActionNative" for="coverEditorInput" role="menuitem">▧ Editar portada</label>
     <button type="button" data-book-action="title">✎ Editar título</button>
     <button type="button" data-book-action="author">♙ Editar autor</button>
     <div class="menuDivider"></div>
@@ -229,7 +232,7 @@
       <div class="editBookActions"><button id="editModalCancel" type="button">Cancelar</button><button id="editModalSave" type="button">Guardar</button></div>
     </div>
   </div>
-  <input id="coverEditorInput" type="file" accept="image/*" />
+  <input id="coverEditorInput" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif" />
 
   <div id="toast" class="toast"></div>
   <script src="./ios-audio-v9.js?v=16"></script>
@@ -238,20 +241,22 @@
   <script type="module" src="./app.js?v=16"></script>
   <script src="./continuous-ai-v12.js?v=16"></script>
   <script src="./interface-v16.js?v=16"></script>
+  <script src="./interaction-v19.js?v=31"></script>
+  <script src="./cover-native-v31.js?v=31"></script>
   <script>
     window.addEventListener("load", async () => {
       if (!("serviceWorker" in navigator)) return;
       try {
-        const reg = await navigator.serviceWorker.register("./sw.js?v=16", { updateViaCache: "none" });
+        const reg = await navigator.serviceWorker.register("./sw.js?v=31", { updateViaCache: "none" });
         await reg.update();
         navigator.serviceWorker.addEventListener("controllerchange", () => {
-          const key = "narrador-v16-reloaded";
+          const key = "narrador-v31-reloaded";
           if (sessionStorage.getItem(key)) return;
           sessionStorage.setItem(key,"1");
           location.reload();
         });
       } catch (error) {
-        console.warn("Narrador: no se pudo forzar la actualización del PWA", error);
+        console.warn("Narrador: no se pudo actualizar el PWA", error);
       }
     });
   </script>
