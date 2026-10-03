@@ -1,19 +1,21 @@
-const CACHE = "narrador-v55";
+const CACHE = "narrador-v56";
 const CORE = [
   "./",
   "./index.html",
-  "./auth-v51.js?v=55",
-  "./theme-v53.js?v=55",
-  "./boot-v50.js?v=55",
-  "./bootstrap-v40.js?v=55",
-  "./pdf-cover-v40.js?v=55",
-  "./home-player-v42.js?v=55",
-  "./home-late-v47.js?v=55",
-  "./ai-audiobook-v50.js?v=55",
-  "./ios-speech-history-v49.js?v=55",
-  "./library-firsttap-v43.js?v=55",
-  "./experience-v54.js?v=55",
-  "./home-controls-v55.js?v=55",
+  "./auth-v51.js?v=56",
+  "./theme-v53.js?v=56",
+  "./boot-v50.js?v=56",
+  "./bootstrap-v40.js?v=56",
+  "./pdf-cover-v40.js?v=56",
+  "./home-player-v42.js?v=56",
+  "./home-late-v47.js?v=56",
+  "./ai-audiobook-v50.js?v=56",
+  "./ios-speech-history-v49.js?v=56",
+  "./library-firsttap-v43.js?v=56",
+  "./experience-v54.js?v=56",
+  "./home-controls-v55.js?v=56",
+  "./import-preview-v56.js?v=56",
+  "./daily-experience-v56.js?v=56",
   "./styles.css?v=16",
   "./interface-v15.css?v=16",
   "./interface-v16.css?v=16",
@@ -50,16 +52,18 @@ function enhanceHtml(html) {
     .replace(/\s*<script[^>]*src=["']\.\/library-firsttap-v43\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/experience-v54\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/home-controls-v55\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
+    .replace(/\s*<script[^>]*src=["']\.\/import-preview-v56\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
+    .replace(/\s*<script[^>]*src=["']\.\/daily-experience-v56\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\.\/ai-boost-v10\.js\?v=\d+/gi, "./ai-boost-v10.js?v=52");
 
   const withHead = cleaned.replace(
     "</head>",
-    '  <script src="./auth-v51.js?v=55"></script>\n  <script src="./theme-v53.js?v=55"></script>\n  <script src="./boot-v50.js?v=55"></script>\n  <script src="./bootstrap-v40.js?v=55"></script>\n  <script type="module" src="./pdf-cover-v40.js?v=55"></script>\n  <script src="./home-player-v42.js?v=55"></script>\n  <script src="./library-firsttap-v43.js?v=55"></script>\n</head>'
+    '  <script src="./auth-v51.js?v=56"></script>\n  <script src="./theme-v53.js?v=56"></script>\n  <script src="./boot-v50.js?v=56"></script>\n  <script src="./bootstrap-v40.js?v=56"></script>\n  <script type="module" src="./pdf-cover-v40.js?v=56"></script>\n  <script src="./home-player-v42.js?v=56"></script>\n  <script src="./library-firsttap-v43.js?v=56"></script>\n</head>'
   );
 
   return withHead.replace(
     "</body>",
-    '  <script src="./home-late-v47.js?v=55"></script>\n  <script src="./ai-audiobook-v50.js?v=55"></script>\n  <script src="./ios-speech-history-v49.js?v=55"></script>\n  <script src="./experience-v54.js?v=55"></script>\n  <script src="./home-controls-v55.js?v=55"></script>\n</body>'
+    '  <script src="./import-preview-v56.js?v=56"></script>\n  <script src="./home-late-v47.js?v=56"></script>\n  <script src="./ai-audiobook-v50.js?v=56"></script>\n  <script src="./ios-speech-history-v49.js?v=56"></script>\n  <script src="./experience-v54.js?v=56"></script>\n  <script src="./home-controls-v55.js?v=56"></script>\n  <script src="./daily-experience-v56.js?v=56"></script>\n</body>'
   );
 }
 
@@ -68,19 +72,11 @@ async function enhancedHtmlResponse(response) {
   const headers = new Headers(response.headers);
   headers.delete("content-length");
   headers.delete("content-encoding");
-  return new Response(html, {
-    status: response.status,
-    statusText: response.statusText,
-    headers
-  });
+  return new Response(html, { status: response.status, statusText: response.statusText, headers });
 }
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE)
-      .then((cache) => cache.addAll(CORE))
-      .then(() => self.skipWaiting())
-  );
+  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(CORE)).then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", (event) => {
@@ -97,9 +93,7 @@ self.addEventListener("notificationclick", (event) => {
     const target = new URL("./", self.registration.scope).href;
     const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
     for (const client of windows) {
-      if ("focus" in client) {
-        try { await client.focus(); return; } catch (_) {}
-      }
+      if ("focus" in client) { try { await client.focus(); return; } catch (_) {} }
     }
     if (self.clients.openWindow) await self.clients.openWindow(target);
   })());
@@ -109,7 +103,6 @@ self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
-
   const isNavigation = event.request.mode === "navigate" || /(?:index\.html|\/$)/.test(url.pathname);
 
   if (isNavigation) {
