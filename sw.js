@@ -1,16 +1,16 @@
-const CACHE = "narrador-v51";
+const CACHE = "narrador-v52";
 const CORE = [
   "./",
   "./index.html",
-  "./auth-v51.js?v=51",
-  "./boot-v50.js?v=51",
-  "./bootstrap-v40.js?v=51",
-  "./pdf-cover-v40.js?v=51",
-  "./home-player-v42.js?v=51",
-  "./home-late-v47.js?v=51",
-  "./ai-audiobook-v50.js?v=51",
-  "./ios-speech-history-v49.js?v=51",
-  "./library-firsttap-v43.js?v=51",
+  "./auth-v51.js?v=52",
+  "./boot-v50.js?v=52",
+  "./bootstrap-v40.js?v=52",
+  "./pdf-cover-v40.js?v=52",
+  "./home-player-v42.js?v=52",
+  "./home-late-v47.js?v=52",
+  "./ai-audiobook-v50.js?v=52",
+  "./ios-speech-history-v49.js?v=52",
+  "./library-firsttap-v43.js?v=52",
   "./styles.css?v=16",
   "./interface-v15.css?v=16",
   "./interface-v16.css?v=16",
@@ -24,7 +24,7 @@ const CORE = [
   "./detector-v4.js?v=16",
   "./kokoro-ios.js?v=16",
   "./ios-audio-v9.js?v=16",
-  "./ai-boost-v10.js?v=16",
+  "./ai-boost-v10.js?v=52",
   "./continuous-ai-v12.js?v=16",
   "./manifest.webmanifest",
   "./icon.svg"
@@ -43,16 +43,17 @@ function enhanceHtml(html) {
     .replace(/\s*<script[^>]*src=["']\.\/home-late-v47\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/ai-audiobook-v50\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/ios-speech-history-v49\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
-    .replace(/\s*<script[^>]*src=["']\.\/library-firsttap-v43\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n");
+    .replace(/\s*<script[^>]*src=["']\.\/library-firsttap-v43\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
+    .replace(/\.\/ai-boost-v10\.js\?v=\d+/gi, "./ai-boost-v10.js?v=52");
 
   const withHead = cleaned.replace(
     "</head>",
-    '  <script src="./auth-v51.js?v=51"></script>\n  <script src="./boot-v50.js?v=51"></script>\n  <script src="./bootstrap-v40.js?v=51"></script>\n  <script type="module" src="./pdf-cover-v40.js?v=51"></script>\n  <script src="./home-player-v42.js?v=51"></script>\n  <script src="./library-firsttap-v43.js?v=51"></script>\n</head>'
+    '  <script src="./auth-v51.js?v=52"></script>\n  <script src="./boot-v50.js?v=52"></script>\n  <script src="./bootstrap-v40.js?v=52"></script>\n  <script type="module" src="./pdf-cover-v40.js?v=52"></script>\n  <script src="./home-player-v42.js?v=52"></script>\n  <script src="./library-firsttap-v43.js?v=52"></script>\n</head>'
   );
 
   return withHead.replace(
     "</body>",
-    '  <script src="./home-late-v47.js?v=51"></script>\n  <script src="./ai-audiobook-v50.js?v=51"></script>\n  <script src="./ios-speech-history-v49.js?v=51"></script>\n</body>'
+    '  <script src="./home-late-v47.js?v=52"></script>\n  <script src="./ai-audiobook-v50.js?v=52"></script>\n  <script src="./ios-speech-history-v49.js?v=52"></script>\n</body>'
   );
 }
 
