@@ -1,0 +1,185 @@
+/* Narrador v66 — exhaustive cleanup after the v65 screen-recording review. */
+html.n66Cleanup .n66UnknownAuthor,[hidden].n66UnknownAuthor{display:none!important}
+
+/* ---------- iOS focus zoom prevention ---------- */
+@supports (-webkit-touch-callout:none){
+  html.n66Cleanup input,
+  html.n66Cleanup textarea,
+  html.n66Cleanup select{
+    font-size:16px!important;
+  }
+  html.n66Cleanup #librarySearch{
+    font-size:16px!important;
+    line-height:1.2!important;
+  }
+}
+
+/* ---------- Reader: one compact chapter header, no duplicated chapter bar ---------- */
+html.n66Cleanup #readerView #readerBack,
+html.n66Cleanup #readerView #readerListen{
+  position:relative!important;
+  overflow:hidden!important;
+  color:transparent!important;
+  font-size:0!important;
+}
+html.n66Cleanup #readerView #readerBack::before{
+  content:"‹";
+  color:var(--text)!important;
+  font-size:28px!important;
+  line-height:1!important;
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+}
+html.n66Cleanup #readerView #readerListen::before{
+  content:"▶";
+  color:#fff!important;
+  font-size:16px!important;
+  line-height:1!important;
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  padding-left:2px;
+}
+html.n66Cleanup #n65ReaderTopTitle{
+  cursor:pointer!important;
+  position:relative!important;
+  padding:5px 22px 5px 10px!important;
+  border-radius:11px!important;
+  min-height:42px!important;
+}
+html.n66Cleanup #n65ReaderTopTitle::after{
+  content:"⌄";
+  position:absolute;
+  right:7px;
+  top:50%;
+  transform:translateY(-58%);
+  color:var(--muted);
+  font-size:16px;
+  font-weight:700;
+}
+html.n66Cleanup #n65ReaderTopTitle:active{background:var(--accentSoft)!important}
+html.n66Cleanup #readerView .readerChapterBar{
+  position:absolute!important;
+  left:-10000px!important;
+  top:auto!important;
+  width:2px!important;
+  height:2px!important;
+  min-height:0!important;
+  max-height:2px!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  opacity:.001!important;
+  pointer-events:none!important;
+}
+html.n66Cleanup #readerView .readerPaper{
+  padding-top:10px!important;
+}
+html.n66Cleanup #readerView #readerText{
+  max-width:680px!important;
+}
+
+/* ---------- Library: stable metadata, better organize state, enough scroll clearance ---------- */
+html.n66Cleanup #library .libraryAuthor.n66UnknownAuthor{display:none!important}
+html.n66Cleanup body.n61HasMini #libraryView{padding-bottom:250px!important}
+html.n66Cleanup body.n61HasMini #library{margin-bottom:210px!important}
+html.n66Cleanup #library[data-view="grid"] .bookRow h4{
+  min-height:2.45em!important;
+  text-transform:none!important;
+}
+html.n66Cleanup #libraryView #organizeBtn.active{
+  background:var(--accent)!important;
+  color:#fff!important;
+  border-color:var(--accent)!important;
+}
+html.n66Cleanup #library.organizing .bookRow::after{
+  content:"⋮⋮"!important;
+  left:8px!important;
+  top:8px!important;
+  width:31px!important;
+  height:31px!important;
+  border-radius:10px!important;
+  background:rgba(16,24,40,.78)!important;
+  color:#fff!important;
+  font-size:13px!important;
+  letter-spacing:-3px!important;
+  padding-right:3px!important;
+  backdrop-filter:blur(8px)!important;
+  -webkit-backdrop-filter:blur(8px)!important;
+  box-shadow:none!important;
+}
+html.n66Cleanup #library.organizing .bookMenuBtn{display:none!important}
+
+/* ---------- Book detail: one language and known authors stay visible ---------- */
+html.n66Cleanup #bookView #bookAuthorLine:not(.n66UnknownAuthor){
+  display:block!important;
+  margin:0 0 7px!important;
+  color:var(--muted)!important;
+  font-size:12px!important;
+}
+html.n66Cleanup #bookView #bookMeta{
+  color:var(--muted)!important;
+  line-height:1.35!important;
+}
+html.n66Cleanup #bookView #chapters .chapterRow{
+  min-height:64px!important;
+  padding:10px 13px!important;
+}
+html.n66Cleanup #bookView #chapters .chapterRow h4{font-size:14.5px!important}
+html.n66Cleanup #bookView #chapters .chapterRow p{margin:0!important}
+
+/* ---------- Now Playing: correct 15-second iconography and real book icon ---------- */
+html.n66Cleanup .n66SkipIcon{
+  width:26px!important;
+  height:26px!important;
+  fill:none!important;
+  stroke:currentColor!important;
+  stroke-width:1.75!important;
+  stroke-linecap:round!important;
+  stroke-linejoin:round!important;
+  overflow:visible!important;
+}
+html.n66Cleanup .n66SkipIcon text{
+  stroke:none!important;
+  fill:currentColor!important;
+  font:700 7.5px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif!important;
+}
+html.n66Cleanup .n61NowTransport .n61Skip span{
+  font-size:10px!important;
+  line-height:1!important;
+}
+html.n66Cleanup #n64ReadWhile .n66BookIcon{
+  width:18px!important;
+  height:18px!important;
+  fill:none!important;
+  stroke:currentColor!important;
+  stroke-width:1.8!important;
+  stroke-linecap:round!important;
+  stroke-linejoin:round!important;
+  flex:none!important;
+}
+html.n66Cleanup #n64ReadWhile .n64BookGlyph{display:none!important}
+html.n66Cleanup #n61NowPlaying .n61NowChapter{
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+
+/* ---------- General metadata rhythm ---------- */
+html.n66Cleanup #n62RecentSection .n62ShelfCard span,
+html.n66Cleanup #library .libraryAuthor,
+html.n66Cleanup #historyList .historyAuthor{
+  text-transform:none!important;
+}
+
+@media(max-width:420px){
+  html.n66Cleanup body.n61HasMini #libraryView{padding-bottom:270px!important}
+  html.n66Cleanup body.n61HasMini #library{margin-bottom:225px!important}
+  html.n66Cleanup #readerView .readerHeader{
+    grid-template-columns:42px minmax(0,1fr) auto!important;
+  }
+  html.n66Cleanup #n65ReaderTopTitle{padding-right:20px!important}
+}
