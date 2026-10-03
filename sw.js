@@ -1,4 +1,4 @@
-const CACHE = "narrador-v66";
+const CACHE = "narrador-v66-1";
 const CORE = [
   "./",
   "./index.html",
@@ -25,6 +25,7 @@ const CORE = [
   "./ux-v64.js?v=64",
   "./ux-v65.js?v=65",
   "./ux-v66.js?v=66",
+  "./ux-v66b.js?v=661",
   "./styles.css?v=16",
   "./interface-v15.css?v=16",
   "./interface-v16.css?v=16",
@@ -80,6 +81,7 @@ function enhanceHtml(html) {
     .replace(/\s*<script[^>]*src=["']\.\/ux-v64\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/ux-v65\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/ux-v66\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
+    .replace(/\s*<script[^>]*src=["']\.\/ux-v66b\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<link[^>]*href=["']\.\/harmony-v59\.css(?:\?v=\d+)?["'][^>]*>\s*/gi, "\n")
     .replace(/\s*<link[^>]*href=["']\.\/harmony-v60\.css(?:\?v=\d+)?["'][^>]*>\s*/gi, "\n")
     .replace(/\s*<link[^>]*href=["']\.\/ux-v61\.css(?:\?v=\d+)?["'][^>]*>\s*/gi, "\n")
@@ -97,7 +99,7 @@ function enhanceHtml(html) {
 
   return withHead.replace(
     "</body>",
-    '  <script src="./import-preview-v56.js?v=59"></script>\n  <script src="./home-late-v47.js?v=59"></script>\n  <script src="./ai-audiobook-v50.js?v=59"></script>\n  <script src="./ios-speech-history-v49.js?v=59"></script>\n  <script src="./experience-v54.js?v=59"></script>\n  <script src="./home-controls-v55.js?v=59"></script>\n  <script src="./daily-experience-v56.js?v=59"></script>\n  <script src="./polish-v57.js?v=59"></script>\n  <script src="./ux-guard-v61.js?v=611"></script>\n  <script src="./ux-v61.js?v=611"></script>\n  <script src="./ux-v62.js?v=62"></script>\n  <script src="./ux-v63.js?v=63"></script>\n  <script src="./ux-v64.js?v=64"></script>\n  <script src="./ux-v65.js?v=65"></script>\n  <script src="./ux-v66.js?v=66"></script>\n</body>'
+    '  <script src="./import-preview-v56.js?v=59"></script>\n  <script src="./home-late-v47.js?v=59"></script>\n  <script src="./ai-audiobook-v50.js?v=59"></script>\n  <script src="./ios-speech-history-v49.js?v=59"></script>\n  <script src="./experience-v54.js?v=59"></script>\n  <script src="./home-controls-v55.js?v=59"></script>\n  <script src="./daily-experience-v56.js?v=59"></script>\n  <script src="./polish-v57.js?v=59"></script>\n  <script src="./ux-guard-v61.js?v=611"></script>\n  <script src="./ux-v61.js?v=611"></script>\n  <script src="./ux-v62.js?v=62"></script>\n  <script src="./ux-v63.js?v=63"></script>\n  <script src="./ux-v64.js?v=64"></script>\n  <script src="./ux-v65.js?v=65"></script>\n  <script src="./ux-v66.js?v=66"></script>\n  <script src="./ux-v66b.js?v=661"></script>\n</body>'
   );
 }
 
