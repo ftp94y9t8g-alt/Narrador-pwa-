@@ -1,15 +1,16 @@
-const CACHE = "narrador-v50";
+const CACHE = "narrador-v51";
 const CORE = [
   "./",
   "./index.html",
-  "./boot-v50.js?v=50",
-  "./bootstrap-v40.js?v=50",
-  "./pdf-cover-v40.js?v=50",
-  "./home-player-v42.js?v=50",
-  "./home-late-v47.js?v=50",
-  "./ai-audiobook-v50.js?v=50",
-  "./ios-speech-history-v49.js?v=50",
-  "./library-firsttap-v43.js?v=50",
+  "./auth-v51.js?v=51",
+  "./boot-v50.js?v=51",
+  "./bootstrap-v40.js?v=51",
+  "./pdf-cover-v40.js?v=51",
+  "./home-player-v42.js?v=51",
+  "./home-late-v47.js?v=51",
+  "./ai-audiobook-v50.js?v=51",
+  "./ios-speech-history-v49.js?v=51",
+  "./library-firsttap-v43.js?v=51",
   "./styles.css?v=16",
   "./interface-v15.css?v=16",
   "./interface-v16.css?v=16",
@@ -31,6 +32,7 @@ const CORE = [
 
 function enhanceHtml(html) {
   const cleaned = html
+    .replace(/\s*<script[^>]*src=["']\.\/auth-v51\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/boot-v50\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/bootstrap-v38\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/bootstrap-v40\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
@@ -45,12 +47,12 @@ function enhanceHtml(html) {
 
   const withHead = cleaned.replace(
     "</head>",
-    '  <script src="./boot-v50.js?v=50"></script>\n  <script src="./bootstrap-v40.js?v=50"></script>\n  <script type="module" src="./pdf-cover-v40.js?v=50"></script>\n  <script src="./home-player-v42.js?v=50"></script>\n  <script src="./library-firsttap-v43.js?v=50"></script>\n</head>'
+    '  <script src="./auth-v51.js?v=51"></script>\n  <script src="./boot-v50.js?v=51"></script>\n  <script src="./bootstrap-v40.js?v=51"></script>\n  <script type="module" src="./pdf-cover-v40.js?v=51"></script>\n  <script src="./home-player-v42.js?v=51"></script>\n  <script src="./library-firsttap-v43.js?v=51"></script>\n</head>'
   );
 
   return withHead.replace(
     "</body>",
-    '  <script src="./home-late-v47.js?v=50"></script>\n  <script src="./ai-audiobook-v50.js?v=50"></script>\n  <script src="./ios-speech-history-v49.js?v=50"></script>\n</body>'
+    '  <script src="./home-late-v47.js?v=51"></script>\n  <script src="./ai-audiobook-v50.js?v=51"></script>\n  <script src="./ios-speech-history-v49.js?v=51"></script>\n</body>'
   );
 }
 
