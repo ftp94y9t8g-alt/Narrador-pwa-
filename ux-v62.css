@@ -1,0 +1,228 @@
+/* Narrador v62 — richer Home, attached mini-player, reader-safe playback chrome. */
+
+/* ---------- Home atmosphere ---------- */
+#homeView{
+  position:relative!important;
+  isolation:isolate;
+}
+#n62HomeAura{
+  position:absolute;
+  z-index:-2;
+  top:38px;
+  left:-54px;
+  right:-54px;
+  height:470px;
+  background-size:cover;
+  background-position:center;
+  filter:blur(54px) saturate(1.25);
+  transform:scale(1.08);
+  opacity:.20;
+  pointer-events:none;
+  -webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,.95),rgba(0,0,0,.62) 55%,transparent 100%);
+  mask-image:linear-gradient(to bottom,rgba(0,0,0,.95),rgba(0,0,0,.62) 55%,transparent 100%);
+}
+#homeView::after{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  left:-30px;
+  right:-30px;
+  top:70px;
+  height:500px;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 50% 18%,rgba(255,255,255,.58),rgba(255,255,255,.10) 44%,transparent 72%),
+    linear-gradient(to bottom,transparent 52%,var(--bg,#f5f7fb) 100%);
+}
+html[data-narrador-theme="dark"] #n62HomeAura{opacity:.27;filter:blur(58px) saturate(1.16) brightness(.62)}
+html[data-narrador-theme="dark"] #homeView::after{
+  background:radial-gradient(circle at 50% 18%,rgba(35,47,72,.42),rgba(12,17,27,.12) 45%,transparent 72%),linear-gradient(to bottom,transparent 50%,var(--bg,#0d1118) 100%);
+}
+
+/* Hero feels intentional rather than empty. */
+#homeView .homeFeatured{
+  width:100%!important;
+  max-width:520px!important;
+  margin:0 auto 24px!important;
+}
+#homeView .v18HomeShell{
+  position:relative!important;
+  padding:8px 0 0!important;
+}
+.n62HeroKicker{
+  margin:2px 0 14px;
+  font-size:10px;
+  line-height:1;
+  letter-spacing:.16em;
+  font-weight:900;
+  color:var(--accent,#2f6df6);
+}
+#homeView .v18HomeCover{
+  width:min(64vw,258px)!important;
+  max-width:258px!important;
+  margin-bottom:16px!important;
+  border-radius:22px!important;
+  box-shadow:0 24px 56px rgba(20,29,50,.20)!important;
+  transform:translateZ(0);
+}
+#homeView .v18HomeTitle{
+  max-width:430px!important;
+  font-size:27px!important;
+  line-height:1.06!important;
+  margin-bottom:7px!important;
+  text-wrap:balance;
+}
+#homeView .v18HomeAuthor{
+  margin-bottom:10px!important;
+  font-size:13px!important;
+  color:var(--muted,#748095)!important;
+}
+.n62HeroMeta{
+  width:min(86vw,360px);
+  margin:0 auto 13px;
+}
+.n62HeroChapter{
+  font-size:12px;
+  line-height:1.25;
+  font-weight:780;
+  color:var(--text,#111827);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  margin-bottom:8px;
+}
+.n62HeroProgress{
+  height:4px;
+  border-radius:999px;
+  background:color-mix(in srgb,var(--line,#dfe5ef) 84%,transparent);
+  overflow:hidden;
+}
+.n62HeroProgress i{
+  display:block;
+  height:100%;
+  border-radius:inherit;
+  background:linear-gradient(90deg,var(--accent,#2f6df6),#6993ff);
+}
+.n62HeroCount{
+  margin-top:6px;
+  font-size:10px;
+  font-weight:700;
+  color:var(--muted,#748095);
+}
+#homeView .n61HeroActions{margin-top:2px!important}
+#homeView .n61HeroListen{
+  box-shadow:0 12px 27px rgba(47,109,246,.25)!important;
+}
+#homeView #continueCard{display:none!important}
+#homeView > .homeSection.n62LegacyHomeSection{display:none!important}
+
+/* ---------- Home library shelf ---------- */
+#n62RecentSection{
+  position:relative;
+  z-index:2;
+  width:100%;
+  max-width:680px;
+  margin:12px auto 12px;
+}
+.n62ShelfHead{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:0 2px 10px;
+}
+.n62ShelfHead h3{
+  margin:0;
+  font-size:19px;
+  line-height:1.1;
+  font-weight:900;
+  letter-spacing:-.025em;
+}
+.n62SeeAll{
+  border:0;
+  background:transparent;
+  color:var(--accent,#2f6df6);
+  font-size:11px;
+  font-weight:850;
+  padding:7px 2px;
+}
+.n62ShelfTrack{
+  display:grid;
+  grid-auto-flow:column;
+  grid-auto-columns:minmax(126px,148px);
+  gap:13px;
+  overflow-x:auto;
+  overscroll-behavior-inline:contain;
+  scroll-snap-type:x proximity;
+  padding:0 2px 8px;
+  scrollbar-width:none;
+}
+.n62ShelfTrack::-webkit-scrollbar{display:none}
+.n62ShelfCard{
+  min-width:0;
+  border:0;
+  background:transparent;
+  color:var(--text,#111827);
+  padding:0;
+  text-align:left;
+  scroll-snap-align:start;
+}
+.n62ShelfCard:active{transform:scale(.98)}
+.n62ShelfCover{
+  width:100%;
+  aspect-ratio:1/1;
+  border-radius:17px;
+  background:linear-gradient(145deg,#2d3955,#111827);
+  background-size:cover!important;
+  background-position:center!important;
+  background-repeat:no-repeat!important;
+  display:grid;
+  place-items:center;
+  color:#fff;
+  font-size:22px;
+  font-weight:900;
+  box-shadow:0 12px 26px rgba(20,29,50,.14);
+  overflow:hidden;
+  margin-bottom:9px;
+}
+.n62ShelfCard strong,.n62ShelfCard span{
+  display:block;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.n62ShelfCard strong{font-size:12px;line-height:1.2;font-weight:850}
+.n62ShelfCard span{font-size:10px;line-height:1.2;color:var(--muted,#748095);margin-top:3px}
+
+/* ---------- Mini-player visually belongs to the navigation ---------- */
+#n61MiniPlayer{
+  left:22px!important;
+  right:22px!important;
+  bottom:calc(env(safe-area-inset-bottom) + 78px)!important;
+  min-height:64px!important;
+  border-radius:18px 18px 13px 13px!important;
+  background:color-mix(in srgb,var(--n61-panel,var(--surface,#fff)) 94%,transparent)!important;
+  border-color:color-mix(in srgb,var(--n61-line,var(--line,#e1e6ef)) 88%,transparent)!important;
+  box-shadow:0 12px 30px rgba(20,29,50,.13)!important;
+}
+body.n61HasMini .bottomNav{
+  box-shadow:0 16px 42px rgba(20,29,50,.12)!important;
+}
+.n61MiniCover{width:46px!important;height:46px!important;border-radius:10px!important}
+.n61MiniTitle{font-size:12.5px!important}.n61MiniMeta{font-size:9.8px!important}
+.n61MiniProgress{left:8px!important;right:8px!important;bottom:2px!important;height:2px!important}
+.n61MiniPlay{width:40px!important;height:40px!important;box-shadow:0 7px 15px rgba(47,109,246,.20)!important}
+
+/* The reader should remain a reading surface: no floating mini-player over text. */
+body.n62ReaderMode #n61MiniPlayer{display:none!important}
+body.n62ReaderMode.n61HasMini .shell{padding-bottom:calc(env(safe-area-inset-bottom) + 112px)!important}
+
+@media(max-width:420px){
+  #n62HomeAura{left:-38px;right:-38px;height:430px;top:48px;opacity:.18}
+  #homeView .v18HomeCover{width:min(66vw,242px)!important;max-width:242px!important}
+  #homeView .v18HomeTitle{font-size:24px!important;max-width:355px!important}
+  .n62HeroMeta{width:min(88vw,340px)}
+  #n62RecentSection{margin-top:8px}
+  .n62ShelfTrack{grid-auto-columns:minmax(118px,138px);gap:11px}
+  #n61MiniPlayer{left:14px!important;right:14px!important;bottom:calc(env(safe-area-inset-bottom) + 76px)!important}
+}
