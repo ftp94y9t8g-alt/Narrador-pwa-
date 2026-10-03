@@ -1,17 +1,45 @@
-/* Narrador v67 — full-width reader and near-full-screen Now Playing. */
+/* Narrador v68 — mathematically full-width reader + responsive near-full-screen player. */
 
-/* ---------- Reader: true full-width immersive surface ---------- */
-html.n67Immersive #readerView{
+/* The old shell is centered and padded. While reading, remove that coordinate system
+   entirely so 100% means exactly the visual viewport width on every device. */
+html.n67Immersive,
+html.n67Immersive body{
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  overflow-x:clip!important;
+}
+html.n67Immersive body.n68ReaderActive{
+  background:var(--n68-reader-bg,#F4F6FC)!important;
+}
+html.n67Immersive body.n68ReaderActive .shell{
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  margin:0!important;
+  padding-left:0!important;
+  padding-right:0!important;
+  overflow:visible!important;
+}
+
+/* ---------- Reader: true edge-to-edge surface ---------- */
+html.n67Immersive body.n68ReaderActive #readerView{
   position:relative!important;
-  left:50%!important;
-  transform:translateX(-50%)!important;
-  width:100dvw!important;
-  max-width:100dvw!important;
+  inset:auto!important;
+  left:auto!important;
+  right:auto!important;
+  transform:none!important;
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
   min-height:100dvh!important;
   margin:0!important;
+  padding:0!important;
   box-sizing:border-box!important;
+  border:0!important;
   border-radius:0!important;
-  overflow-x:hidden!important;
+  overflow-x:clip!important;
+  background:var(--n68-reader-bg,#F4F6FC)!important;
 }
 html.n67Immersive #readerView[data-n64-reader-theme="light"]{background:#F4F6FC!important}
 html.n67Immersive #readerView[data-n64-reader-theme="sepia"]{background:#F4ECD8!important}
@@ -19,24 +47,34 @@ html.n67Immersive #readerView[data-n64-reader-theme="dark"]{background:#14171F!i
 
 html.n67Immersive #readerView .readerHeader{
   width:min(100%,760px)!important;
+  max-width:760px!important;
   margin:0 auto!important;
-  padding:10px max(20px,env(safe-area-inset-left)) 10px max(20px,env(safe-area-inset-right))!important;
+  padding-top:10px!important;
+  padding-bottom:10px!important;
+  padding-left:max(16px,env(safe-area-inset-left))!important;
+  padding-right:max(16px,env(safe-area-inset-right))!important;
   box-sizing:border-box!important;
 }
 html.n67Immersive #readerView .readerPaper{
   width:100%!important;
   max-width:none!important;
+  min-width:0!important;
   margin:0!important;
-  padding:22px max(28px,7vw) calc(72px + env(safe-area-inset-bottom))!important;
+  padding-top:clamp(16px,3.2vw,28px)!important;
+  padding-bottom:calc(72px + env(safe-area-inset-bottom))!important;
+  padding-left:max(env(safe-area-inset-left),clamp(22px,7vw,58px))!important;
+  padding-right:max(env(safe-area-inset-right),clamp(22px,7vw,58px))!important;
   box-sizing:border-box!important;
   border:0!important;
   border-radius:0!important;
   box-shadow:none!important;
   background:transparent!important;
+  overflow:visible!important;
 }
 html.n67Immersive #readerView #readerText{
   width:100%!important;
   max-width:680px!important;
+  min-width:0!important;
   margin:0 auto!important;
   overflow-wrap:normal!important;
   word-break:normal!important;
@@ -46,93 +84,93 @@ html.n67Immersive #readerView #readerText{
   font-kerning:normal!important;
 }
 html.n67Immersive #readerView #readerText p{
+  width:100%!important;
+  max-width:100%!important;
   white-space:normal!important;
   word-spacing:normal!important;
   letter-spacing:normal!important;
 }
 
-/* ---------- Now Playing: almost full screen ---------- */
+/* ---------- Now Playing: viewport-based, not card-based ---------- */
 html.n67Immersive #n61NowPlaying .n61NowPanel{
-  top:calc(env(safe-area-inset-top) + 8px)!important;
+  top:max(env(safe-area-inset-top),4px)!important;
   bottom:0!important;
   left:0!important;
   right:0!important;
   width:100%!important;
   max-width:none!important;
+  min-width:0!important;
   height:auto!important;
   max-height:none!important;
   margin:0!important;
-  padding:8px max(20px,env(safe-area-inset-left)) calc(18px + env(safe-area-inset-bottom)) max(20px,env(safe-area-inset-right))!important;
+  padding-top:8px!important;
+  padding-bottom:calc(18px + env(safe-area-inset-bottom))!important;
+  padding-left:max(16px,env(safe-area-inset-left))!important;
+  padding-right:max(16px,env(safe-area-inset-right))!important;
   box-sizing:border-box!important;
   border-left:0!important;
   border-right:0!important;
   border-bottom:0!important;
   border-radius:28px 28px 0 0!important;
+  overflow-x:hidden!important;
   overflow-y:auto!important;
   overscroll-behavior:contain!important;
   -webkit-overflow-scrolling:touch!important;
 }
 html.n67Immersive #n61NowPlaying .n61NowHandle{margin-top:1px!important}
 html.n67Immersive #n61NowPlaying .n61NowCover{
-  width:min(58vw,300px)!important;
-  max-height:42dvh!important;
+  width:min(64vw,300px)!important;
+  max-width:300px!important;
+  max-height:min(42dvh,400px)!important;
   margin-top:4px!important;
   margin-bottom:18px!important;
   border-radius:18px!important;
 }
-html.n67Immersive #n61NowPlaying .n61NowTitle{
-  max-width:760px!important;
-  margin-left:auto!important;
-  margin-right:auto!important;
-  text-align:center!important;
-}
+html.n67Immersive #n61NowPlaying .n61NowTitle,
 html.n67Immersive #n61NowPlaying .n61NowAuthor,
-html.n67Immersive #n61NowPlaying .n61NowChapter{
-  max-width:760px!important;
-  margin-left:auto!important;
-  margin-right:auto!important;
-  text-align:center!important;
-}
+html.n67Immersive #n61NowPlaying .n61NowChapter,
 html.n67Immersive #n61NowPlaying .n61NowProgress,
 html.n67Immersive #n61NowPlaying .n61NowTimes,
 html.n67Immersive #n61NowPlaying .n61NowTransport,
 html.n67Immersive #n61NowPlaying .n61NowActions,
 html.n67Immersive #n61NowPlaying #n64ReadWhile{
+  width:100%!important;
   max-width:760px!important;
   margin-left:auto!important;
   margin-right:auto!important;
+  box-sizing:border-box!important;
 }
+html.n67Immersive #n61NowPlaying .n61NowTitle,
+html.n67Immersive #n61NowPlaying .n61NowAuthor,
+html.n67Immersive #n61NowPlaying .n61NowChapter{text-align:center!important}
 
-/* Speed is a nested sheet now; it must appear above Now Playing rather than behind it. */
-html.n67Immersive .homeSheet45.open{
-  z-index:2147483600!important;
-}
+/* Nested controls must remain inside the playback experience visually. */
+html.n67Immersive .homeSheet45.open{z-index:2147483600!important}
 html.n67Immersive .homeSheet45.open .homeSheetPanel45{
-  max-height:calc(100dvh - env(safe-area-inset-top) - 24px)!important;
+  width:100%!important;
+  max-width:none!important;
+  max-height:calc(100dvh - max(env(safe-area-inset-top),12px))!important;
+  box-sizing:border-box!important;
 }
-
-/* Keep nested sheets visually above the expanded player too. */
 html.n67Immersive #dailySheet56.open,
 html.n67Immersive #n61ReaderSheet.open,
-html.n67Immersive #n61NarrationModal.open{
-  z-index:2147483650!important;
+html.n67Immersive #n61NarrationModal.open{z-index:2147483650!important}
+
+/* Extra-small phones retain readable margins without any hard-coded device width. */
+@media(max-width:360px){
+  html.n67Immersive #readerView .readerPaper{
+    padding-left:max(env(safe-area-inset-left),20px)!important;
+    padding-right:max(env(safe-area-inset-right),20px)!important;
+  }
+  html.n67Immersive #n61NowPlaying .n61NowCover{width:min(60vw,225px)!important}
+  html.n67Immersive #n61NowPlaying .n61NowActions{gap:5px!important}
 }
 
-@media(max-width:420px){
-  html.n67Immersive #readerView .readerHeader{
-    padding-left:16px!important;
-    padding-right:16px!important;
-  }
+/* Wide phones/tablets/landscape: content remains readable while background is edge-to-edge. */
+@media(min-width:768px){
   html.n67Immersive #readerView .readerPaper{
-    padding-left:26px!important;
-    padding-right:26px!important;
+    padding-left:max(env(safe-area-inset-left),40px)!important;
+    padding-right:max(env(safe-area-inset-right),40px)!important;
   }
-  html.n67Immersive #n61NowPlaying .n61NowPanel{
-    top:calc(env(safe-area-inset-top) + 5px)!important;
-    padding-left:16px!important;
-    padding-right:16px!important;
-  }
-  html.n67Immersive #n61NowPlaying .n61NowCover{
-    width:min(64vw,270px)!important;
-  }
+  html.n67Immersive #n61NowPlaying .n61NowCover{width:min(34vw,300px)!important}
 }
