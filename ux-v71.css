@@ -1,0 +1,9 @@
+/* Narrador v71 — final real-device stability layer */
+html.n71Stable,html.n71Stable body{max-width:100%;overflow-x:hidden}
+html.n71Stable button,html.n71Stable .navItem,html.n71Stable .bottomNav,html.n71Stable .bookRow,html.n71Stable .n62ShelfCard,html.n71Stable .n61MiniPlayer,html.n71Stable [role="button"]{-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important;touch-action:manipulation}
+html.n71Stable #readerView,html.n71Stable body.n68ReaderActive,html.n71Stable body.n68ReaderActive .shell{width:100%!important;max-width:100%!important;margin-inline:0!important;border-inline:0!important}
+html.n71Stable #readerView{overflow-x:hidden!important}
+html.n71Stable #readerText,html.n71Stable #readerText p{-webkit-hyphens:none!important;hyphens:none!important;word-break:normal!important;overflow-wrap:normal!important}
+html.n71Stable #bookActionMenu{max-width:calc(100dvw - max(24px,env(safe-area-inset-left) + env(safe-area-inset-right)))!important}
+html.n71Stable #n61NowPlaying{max-width:100dvw!important;box-sizing:border-box!important}
+html.n71Stable .n61NowTitle,html.n71Stable .libraryTitle,html.n71Stable .bookTitle{overflow-wrap:anywhere}
