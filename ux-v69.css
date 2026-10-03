@@ -1,0 +1,82 @@
+/* Narrador v69 — QA corrections from iPhone screen recording. */
+
+/* Safari's automatic hyphenation looked like broken PDF words (bom-bardeos,
+   profe-sor, cabe-llo). Reader text should never add display-only hyphens. */
+html.n69QA #readerView #readerText,
+html.n69QA #readerView #readerText p{
+  -webkit-hyphens:none!important;
+  hyphens:none!important;
+  word-break:normal!important;
+  overflow-wrap:normal!important;
+}
+
+/* Keep the reader's edge-to-edge background mathematically tied to the viewport,
+   while the prose itself remains bounded for readability. */
+html.n69QA body.n68ReaderActive,
+html.n69QA body.n68ReaderActive .shell,
+html.n69QA body.n68ReaderActive #readerView{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  margin-left:0!important;
+  margin-right:0!important;
+  border-left:0!important;
+  border-right:0!important;
+}
+html.n69QA body.n68ReaderActive #readerView{
+  min-height:100svh!important;
+  min-height:100dvh!important;
+}
+html.n69QA #readerView .readerPaper{
+  padding-left:max(env(safe-area-inset-left),clamp(20px,6.8vi,58px))!important;
+  padding-right:max(env(safe-area-inset-right),clamp(20px,6.8vi,58px))!important;
+}
+
+/* Library three-dot menu becomes a clamped action sheet instead of a floating
+   panel that can fall behind the mini-player/navigation. */
+html.n69QA #bookActionMenu{
+  position:fixed!important;
+  z-index:2147483640!important;
+  left:50%!important;
+  right:auto!important;
+  top:auto!important;
+  bottom:calc(env(safe-area-inset-bottom) + 154px)!important;
+  transform:translateX(-50%)!important;
+  width:min(520px,calc(100% - 24px))!important;
+  max-width:calc(100% - 24px)!important;
+  max-height:min(55dvh,430px)!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain!important;
+  -webkit-overflow-scrolling:touch!important;
+  border-radius:22px!important;
+  box-sizing:border-box!important;
+  box-shadow:0 24px 70px rgba(15,23,42,.24)!important;
+}
+html.n69QA #bookActionMenu button{
+  min-height:48px!important;
+  padding:0 18px!important;
+  display:flex!important;
+  align-items:center!important;
+  width:100%!important;
+  text-align:left!important;
+  white-space:normal!important;
+  line-height:1.25!important;
+}
+html.n69QA body.n69BookMenuOpen #bookActionMenu{isolation:isolate!important}
+
+/* Avoid tiny layout jumps when metadata changes language. */
+html.n69QA #library .bookRow p,
+html.n69QA #bookMeta{font-variant-numeric:tabular-nums}
+
+/* Very short devices: keep menu fully reachable without covering all content. */
+@media(max-height:680px){
+  html.n69QA #bookActionMenu{
+    bottom:calc(env(safe-area-inset-bottom) + 118px)!important;
+    max-height:48dvh!important;
+  }
+}
+@media(min-width:768px){
+  html.n69QA #bookActionMenu{
+    bottom:calc(env(safe-area-inset-bottom) + 112px)!important;
+  }
+}
