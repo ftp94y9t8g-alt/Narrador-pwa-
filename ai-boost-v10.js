@@ -6,6 +6,9 @@ let warmPromise = null;
 let previewAudio = null;
 let previewUrl = null;
 let restoring = false;
+let loadStartedAt = 0;
+let loadProgress = 0;
+let loadWatchdog = 0;
 
 const $ = (s) => document.querySelector(s);
 
@@ -16,6 +19,13 @@ function setNote(message, error = false) {
   const span = note.querySelector("span");
   if (strong) strong.textContent = error ? "Narración con IA · requiere atención" : "Narración con IA";
   if (span) span.textContent = message;
+}
+
+function setPreviewButton(message, disabled = true) {
+  const button = $("#previewBtn");
+  if (!button) return;
+  button.disabled = disabled;
+  button.textContent = message;
 }
 
 function languageFromUI() {
@@ -33,29 +43,84 @@ async function preparePronunciationOnly() {
     if (language === "es") {
       setNote("Preparando pronunciación española…");
       await KokoroTTS.prepareLanguage("es");
-      setNote("Pronunciación lista. La IA neuronal se cargará cuando entres a escuchar.");
+      if (!warmPromise && !window.__narradorWarmTTS) setNote("Pronunciación lista. La IA se descargará la primera vez que la uses.");
     }
   } catch (error) {
     console.warn("Narrador: no se pudo preparar la pronunciación", error);
   }
 }
 
+function progressPercent(info) {
+  const value = Number(info?.progress);
+  if (!Number.isFinite(value)) return null;
+  if (value <= 1) return Math.max(0, Math.min(100, Math.round(value * 100)));
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function updateLoadProgress(info) {
+  const pct = progressPercent(info);
+  if (pct !== null) loadProgress = Math.max(loadProgress, pct);
+  const label = loadProgress > 0 && loadProgress < 100
+    ? `Descargando motor IA · ${loadProgress}%`
+    : "Cargando motor IA por primera vez…";
+  setNote(`${label} Mantén Narrador abierto; después quedará guardado en este iPhone.`);
+  const button = $("#previewBtn");
+  if (button?.disabled) button.textContent = loadProgress > 0 && loadProgress < 100 ? `Descargando IA · ${loadProgress}%` : "Cargando IA…";
+}
+
+function startLoadWatchdog() {
+  clearInterval(loadWatchdog);
+  loadWatchdog = setInterval(() => {
+    if (!warmPromise || window.__narradorWarmTTS) {
+      clearInterval(loadWatchdog);
+      loadWatchdog = 0;
+      return;
+    }
+    const seconds = Math.round((Date.now() - loadStartedAt) / 1000);
+    if (seconds >= 90) {
+      const pct = loadProgress ? ` (${loadProgress}%)` : "";
+      setNote(`La primera descarga está tardando más de lo normal${pct}. Mantén la app abierta y verifica que el iPhone tenga conexión estable.`, true);
+      const button = $("#previewBtn");
+      if (button?.disabled) button.textContent = loadProgress ? `IA ${loadProgress}% · esperando…` : "IA · esperando conexión…";
+    } else if (seconds >= 25 && !loadProgress) {
+      setNote("Descargando el motor de voz IA. La primera vez puede tardar; las siguientes serán mucho más rápidas.");
+    }
+  }, 5000);
+}
+
 async function warmAI() {
+  if (window.__narradorWarmTTS) return window.__narradorWarmTTS;
   if (warmPromise) return warmPromise;
+  if (!navigator.onLine) {
+    const error = new Error("Necesitas conexión a internet para descargar la IA por primera vez.");
+    setNote(error.message, true);
+    throw error;
+  }
+
+  loadStartedAt = Date.now();
+  loadProgress = 0;
+  setNote("Descargando el motor de voz IA por primera vez…");
+  startLoadWatchdog();
+
   warmPromise = (async () => {
-    setNote("Preparando la IA en segundo plano…");
     const tts = await KokoroTTS.from_pretrained(MODEL_ID, {
       dtype: "q4",
       device: "wasm",
+      progress_callback: updateLoadProgress,
     });
     try { await tts.prepareLanguage?.(languageFromUI()); } catch (_) {}
     window.__narradorWarmTTS = tts;
-    setNote("IA preparada · narración continua lista para iPhone.");
+    loadProgress = 100;
+    clearInterval(loadWatchdog);
+    loadWatchdog = 0;
+    setNote("IA descargada y lista. A partir de ahora las muestras deben iniciar mucho más rápido.");
     return tts;
   })().catch(error => {
+    clearInterval(loadWatchdog);
+    loadWatchdog = 0;
     warmPromise = null;
     console.warn("Narrador: no se pudo preparar la IA", error);
-    setNote("La IA se preparará cuando pulses reproducir.");
+    setNote("No se pudo descargar o iniciar la IA. Revisa la conexión y vuelve a intentarlo.", true);
     throw error;
   });
   return warmPromise;
@@ -117,17 +182,17 @@ function restorePrefs() {
 
 function previewTextFor(language) {
   return language === "en"
-    ? "The night fell, and everything became quiet."
-    : "La noche cayó y todo quedó en silencio.";
+    ? "Welcome to Narrador. Your story is ready."
+    : "Bienvenido a Narrador. Tu historia está lista.";
 }
 
 async function playFastPreview(button) {
   window.__narradorUnlockAudio?.();
   stopPreview();
 
-  const original = button.textContent;
+  const original = "▶ Escuchar muestra";
   button.disabled = true;
-  button.textContent = "Preparando muestra…";
+  button.textContent = window.__narradorWarmTTS ? "Generando muestra…" : "Cargando IA…";
 
   try {
     const tts = await warmAI();
@@ -138,7 +203,8 @@ async function playFastPreview(button) {
     if (language === "en" && /^e[fm]_/.test(voice)) voice = voice.startsWith("ef_") ? "af_bella" : "am_michael";
 
     const speed = Math.max(0.8, Math.min(1.15, Number($("#speedRange")?.value || 0.95)));
-    setNote("Generando una muestra corta…");
+    setNote("Motor IA listo · generando una muestra corta…");
+    button.textContent = "Generando muestra…";
     const raw = await tts.generate(previewTextFor(language), { voice, speed });
     previewUrl = URL.createObjectURL(raw.toBlob());
     previewAudio = new Audio(previewUrl);
@@ -146,7 +212,7 @@ async function playFastPreview(button) {
       stopPreview();
       button.disabled = false;
       button.textContent = original;
-      setNote("IA lista. Las muestras repetidas se reutilizan sin volver a generarlas.");
+      setNote("IA lista en este iPhone. Puedes preparar el audiolibro completo.");
     };
     previewAudio.onerror = () => {
       stopPreview();
@@ -160,7 +226,7 @@ async function playFastPreview(button) {
     console.error("Narrador: falló la muestra rápida", error);
     button.disabled = false;
     button.textContent = original;
-    setNote(`No se pudo generar la muestra: ${String(error?.message || error).slice(0, 180)}`, true);
+    setNote(`No se pudo preparar la IA: ${String(error?.message || error).slice(0, 170)}`, true);
   }
 }
 
@@ -196,5 +262,11 @@ document.addEventListener("pointerdown", (event) => {
   }
 }, { capture: true, passive: true });
 
+window.addEventListener("online", () => {
+  if ($("#engineSelect")?.value === "kokoro" && !window.__narradorWarmTTS) setNote("Conexión recuperada. Toca Escuchar muestra para cargar la IA.");
+});
+window.addEventListener("offline", () => {
+  if ($("#engineSelect")?.value === "kokoro" && !window.__narradorWarmTTS) setNote("Sin conexión. La primera descarga de la IA necesita internet.", true);
+});
 window.addEventListener("DOMContentLoaded", restorePrefs);
 window.__narradorWarmAI = warmAI;
