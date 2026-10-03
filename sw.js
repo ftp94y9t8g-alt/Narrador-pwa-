@@ -1,16 +1,17 @@
-const CACHE = "narrador-v52";
+const CACHE = "narrador-v53";
 const CORE = [
   "./",
   "./index.html",
-  "./auth-v51.js?v=52",
-  "./boot-v50.js?v=52",
-  "./bootstrap-v40.js?v=52",
-  "./pdf-cover-v40.js?v=52",
-  "./home-player-v42.js?v=52",
-  "./home-late-v47.js?v=52",
-  "./ai-audiobook-v50.js?v=52",
-  "./ios-speech-history-v49.js?v=52",
-  "./library-firsttap-v43.js?v=52",
+  "./auth-v51.js?v=53",
+  "./theme-v53.js?v=53",
+  "./boot-v50.js?v=53",
+  "./bootstrap-v40.js?v=53",
+  "./pdf-cover-v40.js?v=53",
+  "./home-player-v42.js?v=53",
+  "./home-late-v47.js?v=53",
+  "./ai-audiobook-v50.js?v=53",
+  "./ios-speech-history-v49.js?v=53",
+  "./library-firsttap-v43.js?v=53",
   "./styles.css?v=16",
   "./interface-v15.css?v=16",
   "./interface-v16.css?v=16",
@@ -33,6 +34,7 @@ const CORE = [
 function enhanceHtml(html) {
   const cleaned = html
     .replace(/\s*<script[^>]*src=["']\.\/auth-v51\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
+    .replace(/\s*<script[^>]*src=["']\.\/theme-v53\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/boot-v50\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/bootstrap-v38\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/bootstrap-v40\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
@@ -48,12 +50,12 @@ function enhanceHtml(html) {
 
   const withHead = cleaned.replace(
     "</head>",
-    '  <script src="./auth-v51.js?v=52"></script>\n  <script src="./boot-v50.js?v=52"></script>\n  <script src="./bootstrap-v40.js?v=52"></script>\n  <script type="module" src="./pdf-cover-v40.js?v=52"></script>\n  <script src="./home-player-v42.js?v=52"></script>\n  <script src="./library-firsttap-v43.js?v=52"></script>\n</head>'
+    '  <script src="./auth-v51.js?v=53"></script>\n  <script src="./theme-v53.js?v=53"></script>\n  <script src="./boot-v50.js?v=53"></script>\n  <script src="./bootstrap-v40.js?v=53"></script>\n  <script type="module" src="./pdf-cover-v40.js?v=53"></script>\n  <script src="./home-player-v42.js?v=53"></script>\n  <script src="./library-firsttap-v43.js?v=53"></script>\n</head>'
   );
 
   return withHead.replace(
     "</body>",
-    '  <script src="./home-late-v47.js?v=52"></script>\n  <script src="./ai-audiobook-v50.js?v=52"></script>\n  <script src="./ios-speech-history-v49.js?v=52"></script>\n</body>'
+    '  <script src="./home-late-v47.js?v=53"></script>\n  <script src="./ai-audiobook-v50.js?v=53"></script>\n  <script src="./ios-speech-history-v49.js?v=53"></script>\n</body>'
   );
 }
 
