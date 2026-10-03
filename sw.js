@@ -1,18 +1,19 @@
-const CACHE = "narrador-v54";
+const CACHE = "narrador-v55";
 const CORE = [
   "./",
   "./index.html",
-  "./auth-v51.js?v=54",
-  "./theme-v53.js?v=54",
-  "./boot-v50.js?v=54",
-  "./bootstrap-v40.js?v=54",
-  "./pdf-cover-v40.js?v=54",
-  "./home-player-v42.js?v=54",
-  "./home-late-v47.js?v=54",
-  "./ai-audiobook-v50.js?v=54",
-  "./ios-speech-history-v49.js?v=54",
-  "./library-firsttap-v43.js?v=54",
-  "./experience-v54.js?v=54",
+  "./auth-v51.js?v=55",
+  "./theme-v53.js?v=55",
+  "./boot-v50.js?v=55",
+  "./bootstrap-v40.js?v=55",
+  "./pdf-cover-v40.js?v=55",
+  "./home-player-v42.js?v=55",
+  "./home-late-v47.js?v=55",
+  "./ai-audiobook-v50.js?v=55",
+  "./ios-speech-history-v49.js?v=55",
+  "./library-firsttap-v43.js?v=55",
+  "./experience-v54.js?v=55",
+  "./home-controls-v55.js?v=55",
   "./styles.css?v=16",
   "./interface-v15.css?v=16",
   "./interface-v16.css?v=16",
@@ -48,16 +49,17 @@ function enhanceHtml(html) {
     .replace(/\s*<script[^>]*src=["']\.\/ios-speech-history-v49\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/library-firsttap-v43\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/experience-v54\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
+    .replace(/\s*<script[^>]*src=["']\.\/home-controls-v55\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\.\/ai-boost-v10\.js\?v=\d+/gi, "./ai-boost-v10.js?v=52");
 
   const withHead = cleaned.replace(
     "</head>",
-    '  <script src="./auth-v51.js?v=54"></script>\n  <script src="./theme-v53.js?v=54"></script>\n  <script src="./boot-v50.js?v=54"></script>\n  <script src="./bootstrap-v40.js?v=54"></script>\n  <script type="module" src="./pdf-cover-v40.js?v=54"></script>\n  <script src="./home-player-v42.js?v=54"></script>\n  <script src="./library-firsttap-v43.js?v=54"></script>\n</head>'
+    '  <script src="./auth-v51.js?v=55"></script>\n  <script src="./theme-v53.js?v=55"></script>\n  <script src="./boot-v50.js?v=55"></script>\n  <script src="./bootstrap-v40.js?v=55"></script>\n  <script type="module" src="./pdf-cover-v40.js?v=55"></script>\n  <script src="./home-player-v42.js?v=55"></script>\n  <script src="./library-firsttap-v43.js?v=55"></script>\n</head>'
   );
 
   return withHead.replace(
     "</body>",
-    '  <script src="./home-late-v47.js?v=54"></script>\n  <script src="./ai-audiobook-v50.js?v=54"></script>\n  <script src="./ios-speech-history-v49.js?v=54"></script>\n  <script src="./experience-v54.js?v=54"></script>\n</body>'
+    '  <script src="./home-late-v47.js?v=55"></script>\n  <script src="./ai-audiobook-v50.js?v=55"></script>\n  <script src="./ios-speech-history-v49.js?v=55"></script>\n  <script src="./experience-v54.js?v=55"></script>\n  <script src="./home-controls-v55.js?v=55"></script>\n</body>'
   );
 }
 
