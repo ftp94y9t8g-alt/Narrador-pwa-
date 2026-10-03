@@ -1,0 +1,126 @@
+/* Narrador v63 — consolidate playback surfaces and remove remaining legacy visual paths. */
+
+/* ---------- Mini player: only on the four main tabs ---------- */
+body:not(.n63MiniAllowed) #n61MiniPlayer{display:none!important}
+body:not(.n63MiniAllowed).n61HasMini .shell{padding-bottom:calc(env(safe-area-inset-bottom) + 112px)!important}
+body.n63MiniAllowed #n61MiniPlayer{display:flex!important}
+body.n63NowOpen #n61MiniPlayer{display:none!important}
+
+/* ---------- Legacy full player is kept in DOM for engine compatibility, never shown as UI ---------- */
+#playerView{display:none!important}
+#playerView .chapterPicker,
+#playerView .player,
+#playerView .waveform,
+#playerView .currentText,
+#playerView .progressMeta{display:none!important}
+
+/* ---------- Chapter / bookmark / sleep sheets: one consistent family ---------- */
+#dailySheet56 .daily56Panel{
+  display:flex!important;
+  flex-direction:column!important;
+  min-height:min(43dvh,390px)!important;
+  max-height:calc(100dvh - 52px)!important;
+  padding:9px 16px 18px!important;
+  border-radius:29px!important;
+  overflow:hidden!important;
+}
+#dailySheet56 .daily56Handle{flex:none!important;margin:1px auto 10px!important}
+#dailySheet56 .daily56Head{
+  flex:none!important;
+  min-height:45px!important;
+  margin:0 0 10px!important;
+  padding:0 1px!important;
+  border-bottom:1px solid color-mix(in srgb,var(--line,#e2e7ef) 72%,transparent)!important;
+}
+#dailySheet56 .daily56Head h3{
+  font-size:21px!important;
+  line-height:1.12!important;
+  letter-spacing:-.025em!important;
+  font-weight:900!important;
+}
+#dailySheet56 .daily56Close{
+  width:36px!important;
+  height:36px!important;
+  flex:none!important;
+  font-size:17px!important;
+}
+#dailySheet56 #daily56Body{
+  min-height:0!important;
+  flex:1 1 auto!important;
+  overflow:auto!important;
+  -webkit-overflow-scrolling:touch!important;
+  padding:1px 0 4px!important;
+}
+#dailySheet56 .daily56List{gap:8px!important}
+#dailySheet56 .daily56Item{
+  min-height:58px!important;
+  border-radius:15px!important;
+  padding:11px 12px!important;
+}
+#dailySheet56 .daily56Sleep{gap:9px!important}
+#dailySheet56 .daily56Sleep button{
+  min-height:54px!important;
+  border-radius:15px!important;
+  font-size:12px!important;
+}
+#dailySheet56 .n61ChapterTabs{
+  flex:none!important;
+  margin:0 0 11px!important;
+  border-radius:13px!important;
+}
+
+/* ---------- v62 shelf: slightly larger artwork + stable text rhythm ---------- */
+.n62ShelfTrack{
+  grid-auto-columns:146px!important;
+  gap:14px!important;
+  padding-bottom:10px!important;
+}
+.n62ShelfCover{
+  border-radius:18px!important;
+  box-shadow:0 13px 29px rgba(20,29,50,.15)!important;
+  margin-bottom:10px!important;
+}
+.n62ShelfCard strong{
+  min-height:30px!important;
+  font-size:12.5px!important;
+  line-height:1.2!important;
+  display:-webkit-box!important;
+  -webkit-line-clamp:2!important;
+  -webkit-box-orient:vertical!important;
+  white-space:normal!important;
+}
+.n62ShelfCard span{font-size:10.5px!important;margin-top:4px!important}
+
+/* ---------- Now Playing is the sole full playback destination ---------- */
+#n61NowPlaying .n61NowPanel{
+  overscroll-behavior:contain!important;
+}
+#n61NowPlaying .n61NowCover{
+  box-shadow:0 24px 58px rgba(17,24,39,.22)!important;
+}
+#n61NowPlaying .n61NowProgress{
+  height:5px!important;
+}
+#n61NowPlaying .n61NowActions{
+  margin-top:8px!important;
+}
+
+/* Detail screens should never reserve mini-player space. */
+body.n63DedicatedSurface .shell{padding-bottom:calc(env(safe-area-inset-bottom) + 108px)!important}
+body.n63NowOpen{overflow:hidden!important}
+
+html[data-narrador-theme="dark"] #dailySheet56 .daily56Head{
+  border-bottom-color:#293548!important;
+}
+
+@media(max-width:420px){
+  #dailySheet56 .daily56Panel{
+    left:7px!important;
+    right:7px!important;
+    bottom:calc(7px + env(safe-area-inset-bottom))!important;
+    min-height:min(42dvh,370px)!important;
+    padding-inline:14px!important;
+  }
+  .n62ShelfTrack{grid-auto-columns:134px!important;gap:12px!important}
+  .n62ShelfCard strong{font-size:12px!important;min-height:29px!important}
+}
