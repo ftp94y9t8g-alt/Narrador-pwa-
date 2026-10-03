@@ -1,0 +1,5 @@
+/* Narrador v70: stop accidental iOS selection menus and transient touch artifacts. */
+html.n70Stable button,html.n70Stable label,html.n70Stable .navItem,html.n70Stable .navLabel,html.n70Stable .bottomNav,html.n70Stable .bookRow,html.n70Stable .n62ShelfCard,html.n70Stable .n61MiniPlayer,html.n70Stable #homeFeatured .n61HeroActions,html.n70Stable #homeFeatured .n61HeroActions *{-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important}
+html.n70Stable button,html.n70Stable .navItem,html.n70Stable .bookRow{touch-action:manipulation}
+html.n70Stable #readerView #readerText,html.n70Stable #readerView #readerText p{-webkit-hyphens:none!important;hyphens:none!important;word-break:normal!important;overflow-wrap:normal!important}
+html.n70Stable body.n68ReaderActive,html.n70Stable body.n68ReaderActive .shell,html.n70Stable body.n68ReaderActive #readerView{width:100%!important;max-width:100%!important;min-width:0!important;margin-left:0!important;margin-right:0!important}
