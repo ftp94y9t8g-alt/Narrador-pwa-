@@ -1,4 +1,4 @@
-const CACHE = "narrador-v60";
+const CACHE = "narrador-v61";
 const CORE = [
   "./",
   "./index.html",
@@ -18,6 +18,7 @@ const CORE = [
   "./import-preview-v56.js?v=59",
   "./daily-experience-v56.js?v=59",
   "./polish-v57.js?v=59",
+  "./ux-v61.js?v=61",
   "./styles.css?v=16",
   "./interface-v15.css?v=16",
   "./interface-v16.css?v=16",
@@ -26,6 +27,7 @@ const CORE = [
   "./interface-v19.css?v=31",
   "./harmony-v59.css?v=59",
   "./harmony-v60.css?v=60",
+  "./ux-v61.css?v=61",
   "./interface-v16.js?v=16",
   "./interaction-v19.js?v=31",
   "./library-v33.js?v=37",
@@ -60,18 +62,20 @@ function enhanceHtml(html) {
     .replace(/\s*<script[^>]*src=["']\.\/import-preview-v56\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/daily-experience-v56\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<script[^>]*src=["']\.\/polish-v57\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
+    .replace(/\s*<script[^>]*src=["']\.\/ux-v61\.js(?:\?v=\d+)?["'][^>]*><\/script>\s*/gi, "\n")
     .replace(/\s*<link[^>]*href=["']\.\/harmony-v59\.css(?:\?v=\d+)?["'][^>]*>\s*/gi, "\n")
     .replace(/\s*<link[^>]*href=["']\.\/harmony-v60\.css(?:\?v=\d+)?["'][^>]*>\s*/gi, "\n")
+    .replace(/\s*<link[^>]*href=["']\.\/ux-v61\.css(?:\?v=\d+)?["'][^>]*>\s*/gi, "\n")
     .replace(/\.\/ai-boost-v10\.js\?v=\d+/gi, "./ai-boost-v10.js?v=52");
 
   const withHead = cleaned.replace(
     "</head>",
-    '  <script src="./auth-v51.js?v=59"></script>\n  <script src="./locale-v58.js?v=59"></script>\n  <script src="./theme-v53.js?v=59"></script>\n  <script src="./boot-v50.js?v=59"></script>\n  <script src="./bootstrap-v40.js?v=59"></script>\n  <script type="module" src="./pdf-cover-v40.js?v=59"></script>\n  <script src="./home-player-v42.js?v=59"></script>\n  <script src="./library-firsttap-v43.js?v=59"></script>\n  <link rel="stylesheet" href="./harmony-v59.css?v=59" />\n  <link rel="stylesheet" href="./harmony-v60.css?v=60" />\n</head>'
+    '  <script src="./auth-v51.js?v=59"></script>\n  <script src="./locale-v58.js?v=59"></script>\n  <script src="./theme-v53.js?v=59"></script>\n  <script src="./boot-v50.js?v=59"></script>\n  <script src="./bootstrap-v40.js?v=59"></script>\n  <script type="module" src="./pdf-cover-v40.js?v=59"></script>\n  <script src="./home-player-v42.js?v=59"></script>\n  <script src="./library-firsttap-v43.js?v=59"></script>\n  <link rel="stylesheet" href="./harmony-v59.css?v=59" />\n  <link rel="stylesheet" href="./harmony-v60.css?v=60" />\n  <link rel="stylesheet" href="./ux-v61.css?v=61" />\n</head>'
   );
 
   return withHead.replace(
     "</body>",
-    '  <script src="./import-preview-v56.js?v=59"></script>\n  <script src="./home-late-v47.js?v=59"></script>\n  <script src="./ai-audiobook-v50.js?v=59"></script>\n  <script src="./ios-speech-history-v49.js?v=59"></script>\n  <script src="./experience-v54.js?v=59"></script>\n  <script src="./home-controls-v55.js?v=59"></script>\n  <script src="./daily-experience-v56.js?v=59"></script>\n  <script src="./polish-v57.js?v=59"></script>\n</body>'
+    '  <script src="./import-preview-v56.js?v=59"></script>\n  <script src="./home-late-v47.js?v=59"></script>\n  <script src="./ai-audiobook-v50.js?v=59"></script>\n  <script src="./ios-speech-history-v49.js?v=59"></script>\n  <script src="./experience-v54.js?v=59"></script>\n  <script src="./home-controls-v55.js?v=59"></script>\n  <script src="./daily-experience-v56.js?v=59"></script>\n  <script src="./polish-v57.js?v=59"></script>\n  <script src="./ux-v61.js?v=61"></script>\n</body>'
   );
 }
 
